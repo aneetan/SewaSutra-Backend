@@ -1,14 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function main() {
-   const user = await prisma.user.create({ data: {name: "Anita"}});
-   console.log(user)
-}
+prisma.$connect()
+  .then(() => {
+    console.log('✅ Database connected successfully')
+  })
+  .catch((error) => {
+    console.error('❌ Database connection error:', error)
+  })
 
-main()
-   .catch(e => console.log(e.message))
-   .finally(async() => {
-      await prisma.$disconnect()
-   })
-
+export default prisma
