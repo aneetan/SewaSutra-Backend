@@ -1,7 +1,7 @@
 import otpGenerator from 'otp-generator';
 import jwt from "jsonwebtoken";
-import { redis } from "../config/redis.config";
-import { generateJwtToken } from '../utils/jwtToken.utils';
+import { generateJwtToken } from '../utils/jwtToken.util';
+import { redis } from '../config/redis.config';
 
 export interface OTPPayload{
    email : string,

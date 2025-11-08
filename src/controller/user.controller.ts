@@ -3,6 +3,7 @@ import { validateSchema } from "../middleware/validateSchema";
 import { RegisterUserInput, registerUserSchema } from "../schemas/user.schema";
 import userRepository from "../repository/user.repository";
 import bcrypt from 'bcryptjs';
+import { OTPService } from "../services/otp.service";
 
 class UserController {
    register = [
@@ -36,7 +37,16 @@ class UserController {
             const newUser = await userRepository.createUser(userData);
             const email = newUser.email;
 
-            
+            const otp = OTPService.generateOTP();
+            OTPService.storeOTP(email, otp);
+
+            const otpToken = OTPService.generateOTPToken({
+               email,
+               otp,
+               purpose: "email_verification"
+            });
+
+
          }
       }
    ]
