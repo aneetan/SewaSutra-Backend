@@ -9,6 +9,9 @@ import { errorResponse } from "../helpers/errorMsg.helper";
 import { ResendOTPInput, resendOTPSchema, VerifyOTPInput, verifyOTPSchema } from "../schemas/otp.schema";
 import { redis } from "../config/redis.config";
 import { generateJwtToken } from "../utils/jwtToken.util";
+import { verifyAccessToken } from "../middleware/verifyAccessToken";
+import { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken"
 
 class AuthController {
    register = [
@@ -176,13 +179,33 @@ class AuthController {
                accessToken,
                id: user.id
             });  
-            
+
          } catch (e) {
             errorResponse(e, res, "Invalid email or password");
             next(e);
          }
       } 
    ]
+
+   logout = [
+      verifyAccessToken,
+      async(req: Request, res: Response) => {
+         const userId = req.body.userId;
+         const token = req.header("Authorization")?.replace("Bearer ", "");
+         if (!token) return res.status(400).json({ error: "Token required" });
+
+         const decoded = jwt.decode(token!) as JwtPayload;
+         await redis.del(`accessToken:${userId}`);
+
+         const expInSeconds = decoded?.exp! -Math.floor(Date.now() / 1000);
+         if (expInSeconds > 0) {
+               await redis.set(`blacklist:${token}`, "true", "EX", expInSeconds);
+         }
+
+         res.json({ message: "Logged out" });
+      }
+    ]
+
 
 }
 
