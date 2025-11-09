@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { validateSchema } from "../middleware/validateSchema";
-import { RegisterUserInput, registerUserSchema } from "../schemas/user.schema";
+import { LoginUserInput, loginUserSchema, RegisterUserInput, registerUserSchema } from "../schemas/user.schema";
 import userRepository from "../repository/user.repository";
 import bcrypt from 'bcryptjs';
 import { OTPService } from "../services/otp.service";
 import emailService from "../services/email.service";
 import { errorResponse } from "../helpers/errorMsg.helper";
 import { ResendOTPInput, resendOTPSchema, VerifyOTPInput, verifyOTPSchema } from "../schemas/otp.schema";
+import { redis } from "../config/redis.config";
+import { generateJwtToken } from "../utils/jwtToken.util";
 
 class AuthController {
    register = [
@@ -34,6 +36,7 @@ class AuthController {
                address: userDto.address,
                phone: userDto.phone,
                password: hashedPassword,
+               status: userDto.status,
                emailVerified: false
             }
 
@@ -143,6 +146,42 @@ class AuthController {
 
          }
       }
+   ]
+
+   login = [
+      validateSchema(loginUserSchema),
+      async(req: Request<{}, {}, LoginUserInput>, res: Response, next: NextFunction) => {
+         try{
+            const {email, password} = req.body;
+
+            const user = await userRepository.findEmailAndPassword(email, password);
+            if (!user) {
+               return res.status(401).json({error : "Authentication failed"});
+            }
+
+            // Check if email is verified
+            if (!user.emailVerified) {
+               return res.status(403).json({
+                  error: "Email not verified",
+                  message: "Please verify your email before logging in",
+                  userId: user.id
+               });
+            }
+
+            const accessToken = generateJwtToken({user}, '1h');
+            await redis.set(`accessToken:${user.id}`, accessToken, "EX", 60 * 60);
+
+            res.status(200).json({
+               "message": "User logged in successfully",
+               accessToken,
+               id: user.id
+            });  
+            
+         } catch (e) {
+            errorResponse(e, res, "Invalid email or password");
+            next(e);
+         }
+      } 
    ]
 
 }

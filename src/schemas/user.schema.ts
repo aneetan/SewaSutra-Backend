@@ -40,6 +40,7 @@ export const registerUserSchema = z.object({
       .trim(),
     
     role: z.enum(['CLIENT', 'COMPANY', 'ADMIN']),
+    status: z.enum(["VERIFIED", "PENDING","DECLINED"]),
     
     password: z.string()
       .min(1, "Password is required")
@@ -55,5 +56,24 @@ export const registerUserSchema = z.object({
   })
 });
 
+export const loginUserSchema = z.object({
+   body: z.object({
+      email: z.string()
+         .email("Invalid email address"),
+      password: z.string()
+         .min(8, "Password must be at least 8 characters")
+         .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+         .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+         .regex(/[0-9]/, "Password must contain at least one number")
+   })
+})
+
+export const updateUserData = z.object({
+   body: registerUserSchema.shape.body.partial()
+}) 
+
 // Type inference 
 export type RegisterUserInput = z.infer<typeof registerUserSchema>["body"];
+export type LoginUserInput = z.infer<typeof loginUserSchema>["body"];
+export type UpdateUserInput = z.infer<typeof updateUserData>["body"];
+
