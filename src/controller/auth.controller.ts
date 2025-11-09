@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import { OTPService } from "../services/otp.service";
 import emailService from "../services/email.service";
 import { errorResponse } from "../helpers/errorMsg.helper";
+import { VerifyOTPInput, verifyOTPSchema } from "../schemas/otp.schema";
 
 class AuthController {
    register = [
@@ -31,7 +32,7 @@ class AuthController {
                email: userDto.email,
                role: userDto.role,
                address: userDto.address,
-               phone: userDto.address,
+               phone: userDto.phone,
                password: hashedPassword,
                emailVerified: false
             }
@@ -59,6 +60,39 @@ class AuthController {
          } catch (e) {
             errorResponse(e, res, "Error while registering to user");
             next(e); 
+         }
+      }
+   ];
+
+   verifyOTP =[
+      validateSchema(verifyOTPSchema),
+      async (req: Request<{}, {}, VerifyOTPInput>, res: Response, next: NextFunction) => {
+         try{
+            const {email, otp, token} = req.body;
+
+            let isValid= false;
+            if(token) {
+               try{
+                  const payload = OTPService.verifyOTPToken(token);
+                  isValid = payload.otp === otp && payload.email === email;
+               } catch {
+                  isValid = false;
+               }
+            }
+            if (!isValid) {
+               throw new Error('Invalid or expired OTP');
+            }
+
+            await userRepository.updateVerificationStatus(email);
+
+
+            res.status(200).json({
+               message: 'OTP verified successfully',
+            });
+            
+         } catch (e) {
+            errorResponse(e, res, "Invalid or expired OTP");
+            next(e);
          }
       }
    ];

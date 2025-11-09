@@ -11,7 +11,7 @@ export const generateJwtToken = (
 ): string => {
 
    if (!process.env.JWT_SECRET_KEY) {
-      throw new Error("JSON_SECRET_KEY is missing in environment variables.");
+      throw new Error("JWT_SECRET_KEY is missing in environment variables.");
    }
 
    return jwt.sign(

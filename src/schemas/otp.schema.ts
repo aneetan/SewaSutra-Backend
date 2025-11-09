@@ -8,4 +8,4 @@ export const verifyOTPSchema = z.object({
    })
 })
 
-export type VerifyOTPInput = z.infer<typeof verifyOTPSchema>;
+export type VerifyOTPInput = z.infer<typeof verifyOTPSchema>['body'];
