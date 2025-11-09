@@ -10,7 +10,7 @@ export interface OTPPayload{
 }
 
 export class OTPService {
-   private static OTP_EXPIRY = 2 * 60;
+   private static OTP_EXPIRY = 1 * 60;
 
    static generateOTP(length: number = 6): string {
       return otpGenerator.generate(length, {
@@ -35,12 +35,12 @@ export class OTPService {
    }
 
    static async verifyOTP(email: string, otp: string): Promise<boolean> {
+      if(await this.isOTPExpired(email)) return false;
+
       const key = `otp:${email}`;
       const storedOTP = await redis.get(key);
 
-      if (!storedOTP) {
-         return false;
-      }
+      if (!storedOTP) return false;
 
       const isValid = storedOTP === otp;
 

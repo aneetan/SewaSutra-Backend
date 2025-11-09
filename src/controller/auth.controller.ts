@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { OTPService } from "../services/otp.service";
 import emailService from "../services/email.service";
 import { errorResponse } from "../helpers/errorMsg.helper";
-import { VerifyOTPInput, verifyOTPSchema } from "../schemas/otp.schema";
+import { ResendOTPInput, resendOTPSchema, VerifyOTPInput, verifyOTPSchema } from "../schemas/otp.schema";
 
 class AuthController {
    register = [
@@ -21,7 +21,7 @@ class AuthController {
 
             const existingUser = await userRepository.findByEmail(userDto.email);
             if(existingUser) {
-               throw new Error("Email already in use")
+               res.status(409).json({message: "Email already in use"});
             };
 
             //hash password
@@ -79,12 +79,17 @@ class AuthController {
                   isValid = false;
                }
             }
+
+            if (!isValid) {
+               // Also try Redis verification as fallback
+               isValid = await OTPService.verifyOTP(email, otp);
+            }
+
             if (!isValid) {
                throw new Error('Invalid or expired OTP');
             }
 
             await userRepository.updateVerificationStatus(email);
-
 
             res.status(200).json({
                message: 'OTP verified successfully',
@@ -97,6 +102,48 @@ class AuthController {
       }
    ];
 
+   resendOtp = [
+      validateSchema(resendOTPSchema),
+      async (req: Request<{}, {}, ResendOTPInput>, res: Response, next: NextFunction) => {
+         try {
+            const {email, token} = req.body;
+
+            const user = await userRepository.findByEmail(email);
+            if (!user) return res.status(404).json({ message: 'User not found with this email address.'});
+
+            if(token) {
+               try{
+                  const payload = OTPService.verifyOTPToken(token);
+                  if (payload.email !== email){
+                     return res.status(401).json({
+                        success: false,
+                        message: 'Invalid token for this email address.'
+                     });
+                  }
+               }  catch (error) {
+                  return res.status(401).json({
+                     success: false,
+                     message: 'Invalid or expired token.'
+                  });
+               }
+            }
+
+            const otp = await OTPService.resendOTP(email);
+
+            await emailService.sendOTPEmail(email, otp, user.name);
+
+            res.status(200).json({
+               message: "OTP sent to email",
+               token: token,
+               email: email
+            })
+
+
+         } catch(e) {
+
+         }
+      }
+   ]
 
 }
 
