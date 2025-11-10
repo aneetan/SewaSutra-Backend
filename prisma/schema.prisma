@@ -31,4 +31,40 @@ model User {
   password       String 
   status         Status   @default(PENDING)
   emailVerified  Boolean  @default(false)
+  companies      Company[]
+}
+
+model Company {
+  id                Int         @id @default(autoincrement())
+  name              String   
+  registrationNo    String      @unique
+  description       String
+  establishedYear   String
+  serviceCategory   String
+  websiteUrl        String?
+  services          Services[]
+  priceRangeMin     Int
+  priceRangeMax     Int
+  avgDeliveryTime   String
+  userId            Int
+  user              User        @relation(fields: [userId], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  docs              CompanyDocs[]
+}
+
+model Services {
+  serviceId   Int     @id @default(autoincrement())
+  companyId   Int
+  company     Company @relation(fields: [companyId], references: [id])    
+  service     String
+}
+
+model CompanyDocs{
+  docsId            Int     @id @default(autoincrement())
+  logo              Bytes
+  businessLicense   Bytes
+  ownerId           Bytes?
+  companyId         Int
+  company           Company @relation(fields: [companyId], references: [id])
 }
