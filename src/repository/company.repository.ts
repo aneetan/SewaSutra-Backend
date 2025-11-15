@@ -1,7 +1,6 @@
 import { Company } from "@prisma/client";
 import { CreateCompanyData } from "../types/company.types";
 import prisma from "../config/dbconfig";
-import { ensureBuffer } from "../helpers/buffer.helper";
 
 class CompanyRepository {
    async registerCompany(data: CreateCompanyData) {
