@@ -96,13 +96,20 @@ class PineconeService {
          }
 
          const namespaceObj = this.index.namespace(namespace);
-         const results = await namespaceObj.query({
+         const queryOptions: any = {
             vector: queryEmbedding,
             topK,
             includeMetadata: true,
-            includeValues: false,
-            filter
-         });
+            includeValues: false
+         };
+
+          // Only add filter if it's not empty
+         if (filter && Object.keys(filter).length > 0) {
+            queryOptions.filter = filter;
+            console.log(`🔍 Using filter:`, filter);
+         }
+
+         const results = await namespaceObj.query(queryOptions);
 
          return results.matches?.map((match: any) => ({
             id: match.id,

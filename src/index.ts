@@ -6,6 +6,7 @@ import companyRouter from './routes/company.routes';
 import requirementRouter from './routes/requirement.route';
 import { findMatches, runDemo, setupExamples } from './example/match.example';
 import pineconeService from './services/pinecone.services';
+import similarityRouter from './routes/similarity.route';
 
 dotenv.config();
 
@@ -20,6 +21,8 @@ pineconeService.initialize();
 app.use('/auth', authRouter);
 app.use('/company', companyRouter);
 app.use('/client/requirement', requirementRouter);
+app.use('/client', similarityRouter);
+
 
 
 app.get('/', async(req: Request, res: Response) => {

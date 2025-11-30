@@ -118,46 +118,30 @@ class EmbeddingsService {
 
    // Find matching COMPANIES for a REQUIREMENT
   async findCompaniesForRequirement(requirementId: number, topK: number = 5) {
-    try {
-      // Get requirement embedding
-      const requirementVector = await pineconeService.searchSimilar(
-        [], // We'll get the vector by ID first
-        1,
-        'client',
-        { entityId: requirementId }
-      );
-
-      if (!requirementVector || requirementVector.length === 0) {
-        throw new Error(`No embedding found for requirement ${requirementId}`);
-      }
-
-      // We need to get the actual vector values - this would require storing vectors locally
-      // or fetching the requirement and generating embedding on the fly
-      
+    try {      
+       // Get requirement data from database to generate the query embedding
       const requirement = await prisma.requirement.findUnique({
         where: { id: requirementId },
         include: { user: { select: { name: true } } }
       });
-
+      
       if (!requirement) {
         throw new Error(`Requirement ${requirementId} not found`);
       }
 
       const transformedData = DataTransformerService.transformRequirement(requirement);
-      const queryEmbedding = await this.generateEmbeddings(transformedData.embeddingText);
-      
-      // Search for matching companies
-      const results = await pineconeService.findMatchesAcrossNamespaces(
-        queryEmbedding,
-        'client',
-        'company',
-        topK
-      );
-      
-      return results;
+       const queryEmbedding = await this.generateEmbeddings(transformedData.embeddingText);
+
+       const results = await pineconeService.searchSimilar(
+          queryEmbedding, // Use the actual embedding
+          topK,
+          'company' // Search in company namespace
+        );
+
+        return results
 
     } catch (error) {
-      console.error('❌ Error finding companies for requirement:', error);
+      console.error(`❌ Error finding companies for requirement ${requirementId}:`, error);
       throw error;
     }
   }

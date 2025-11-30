@@ -47,7 +47,7 @@ class RequirementController {
 
     // Find matching companies for a requirement
    findMatchingCompanies = [
-      verifyAccessToken,
+      // verifyAccessToken,
       async(req: Request, res: Response, next: NextFunction): Promise<void> => {
          try {
             const { requirementId } = req.params;
