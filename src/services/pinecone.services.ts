@@ -8,17 +8,11 @@ class PineconeService {
    private isInitialized: boolean = false;
 
    constructor() {
-       console.log('🔧 PineconeService: Initializing...');
-
       this.pinecone = new Pinecone({
          apiKey: PineconeConfig.apiKey,
       });
 
-        console.log('✅ Pinecone client created');
-
-          this.index = this.pinecone.Index(PineconeConfig.index.name);
-    console.log('✅ Pinecone index reference obtained');
-     console.log(`🔗 Connecting to index: ${PineconeConfig.index.name}`);
+      this.index = this.pinecone.Index(PineconeConfig.index.name);
    }
 
    //Initialize Pinecone
@@ -43,7 +37,6 @@ class PineconeService {
                } as any,
             });
             this.index = this.pinecone.index(PineconeConfig.index.name);
-            console.log('Pinecone initialized successfully');
          }
       } catch (e) {
          console.error('Failed to initialize Pinecone:', e);
@@ -106,7 +99,6 @@ class PineconeService {
           // Only add filter if it's not empty
          if (filter && Object.keys(filter).length > 0) {
             queryOptions.filter = filter;
-            console.log(`🔍 Using filter:`, filter);
          }
 
          const results = await namespaceObj.query(queryOptions);
@@ -133,7 +125,6 @@ class PineconeService {
          const namespaceObj = this.index.namespace(namespace);
          await namespaceObj.deleteOne(id);
          
-         console.log(`Deleted embedding: ${id} from namespace: ${namespace}`);
          return true;
 
       } catch (error) {
@@ -185,8 +176,6 @@ class PineconeService {
             includeValues: false,
             filter
          });
-
-         console.log(`Found ${results.matches?.length || 0} matches from ${targetNamespace} for query from ${sourceNamespace}`);
 
          return results.matches?.map((match: any) => ({
             id: match.id,

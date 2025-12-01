@@ -107,7 +107,6 @@ class EmbeddingsService {
         'company' 
       );
       
-      console.log(`✅ Saved company embedding: ${company.name}`);
       return savedVector;
 
     } catch (error) {
