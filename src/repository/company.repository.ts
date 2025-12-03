@@ -55,6 +55,11 @@ class CompanyRepository {
          }
       })
    }
+
+   async getCompanyByUser(userId: number){
+      const company = await prisma.company.findFirst({ where: { userId } });
+      return company;
+   }
 }
 
 export default new CompanyRepository();
