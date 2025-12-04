@@ -49,6 +49,6 @@ export interface UpdatePaymentMethodDto {
 export interface PaymentMethodResponse {
   success: boolean;
   message: string;
-  data?: PaymentMethod | PaymentMethod[];
+  data?: PaymentMethodUnion | PaymentMethodUnion[];
   error?: string;
 }
