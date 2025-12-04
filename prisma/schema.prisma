@@ -31,6 +31,11 @@ enum Urgency {
   HIGH
 }
 
+enum PaymentType {
+  ESEWA
+  STRIPE
+}
+
 model User {
   id             Int       @id @default(autoincrement())
   name           String    
@@ -58,10 +63,12 @@ model Company {
   priceRangeMax     Int
   avgDeliveryTime   String
   userId            Int
-  user              User        @relation(fields: [userId], references: [id])
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  user              User          @relation(fields: [userId], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
   docs              CompanyDocs[]
+  projects          Project[]
+  payment           PaymentMethod[]
 }
 
 model Services {
@@ -81,6 +88,46 @@ model CompanyDocs{
   company           Company @relation(fields: [companyId], references: [id])
 }
 
+model Project {
+  projectId         Int       @id @default(autoincrement())
+  title             String
+  description       String
+  completionDate    String
+  projectUrl        String?
+  imageUrl          String? 
+  companyId         Int
+  company           Company   @relation(fields: [companyId], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt     
+}
+
+model PaymentMethod {
+  id          Int   @id @default(autoincrement())
+  type        PaymentType   // 'ESEWA' or 'STRIPE'
+  
+  // Common fields
+  isDefault   Boolean  @default(false)
+  companyId   Int
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // ESEWA specific fields
+  accountName String?
+  phoneNumber String?
+  
+  // Stripe specific fields
+  publicKey   String?
+  secretKey   String?
+  businessName String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Indexes
+  @@index([companyId])
+  @@unique([companyId, type])
+}
+
 model Requirement {
   id              Int       @id @default(autoincrement())
   title           String
@@ -98,3 +145,4 @@ model Requirement {
   userId          Int
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+

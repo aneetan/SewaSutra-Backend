@@ -1,6 +1,6 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import PineconeConfig from "../config/pinecone.config";
-import { PineconeVector } from "../types/pinecone.types";
+import { PineconeVector } from "../types/embeddings/pinecone.types";
 
 class PineconeService {
    private pinecone: Pinecone;
