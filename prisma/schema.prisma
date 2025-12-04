@@ -32,8 +32,8 @@ enum Urgency {
 }
 
 enum PaymentType {
-  eSewa
-  Stripe
+  ESEWA
+  STRIPE
 }
 
 model User {
@@ -68,7 +68,7 @@ model Company {
   updatedAt         DateTime      @updatedAt
   docs              CompanyDocs[]
   projects          Project[]
-  payment           Payment[]
+  payment           PaymentMethod[]
 }
 
 model Services {
@@ -101,13 +101,31 @@ model Project {
   updatedAt         DateTime      @updatedAt     
 }
 
-model Payment  {
-  paymentId      Int    @id @default(autoincrement())
-  type           PaymentType
-  accountName    String
-  accountNumber  String   @unique
-  companyId      Int
-  company        Company @relation(fields: [companyId], references: [id])
+model PaymentMethod {
+  id          Int   @id @default(autoincrement())
+  type        PaymentType   // 'ESEWA' or 'STRIPE'
+  
+  // Common fields
+  isDefault   Boolean  @default(false)
+  companyId   Int
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // ESEWA specific fields
+  accountName String?
+  phoneNumber String?
+  
+  // Stripe specific fields
+  publicKey   String?
+  secretKey   String?
+  businessName String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Indexes
+  @@index([companyId])
+  @@unique([companyId, type])
 }
 
 model Requirement {

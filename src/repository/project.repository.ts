@@ -6,7 +6,7 @@ import companyRepository from "./company.repository";
 const prisma = new PrismaClient();
 
 class ProjectRepository {
-   async createProject(userId: number, userData: Omit<ProjectAttributes, "id">): Promise<Project> {
+   async createProject(userId: number, userData: Omit<ProjectAttributes, "projectId">): Promise<Project> {
       const {title, description, completionDate, projectUrl, imageUrl} = userData;
 
       const company = await prisma.company.findFirst({ where: { userId } });
@@ -27,29 +27,21 @@ class ProjectRepository {
       const company = await companyRepository.getCompanyByUser(userId);
       const projects = await prisma.project.findMany({
         where: { companyId: company.id },
-        orderBy: { completionDate: 'desc' }, // Optional: order by newest first
-        include: { // Optional: include related data
-          company: {
-            select: {
-              name: true,
-              id: true,
-            }
-          }
-        }
+        orderBy: { completionDate: "desc" },
       });
 
       return projects.map(project => ({
         projectId: project.projectId,
         title: project.title,
         description: project.description,
-        completionDate: project.completionDate.split('T')[0], // Format as YYYY-MM-DD
+        completionDate: project.completionDate, // Format as YYYY-MM-DD
         projectUrl: project.projectUrl || undefined,
         imageUrl: project.imageUrl || undefined,
         companyId: project.companyId,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
       }));
-   }
-
-    
+   }  
 }
 
 export default new ProjectRepository();
