@@ -2,10 +2,10 @@
 export type PaymentType = 'ESEWA' | 'STRIPE';
 
 export interface BasePaymentMethod {
-  id: string;
+  id: number;
   type: PaymentType;
   isDefault: boolean;
-  companyId: string;
+  companyId: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,7 +23,7 @@ export interface StripePaymentMethod extends BasePaymentMethod {
   businessName?: string;
 }
 
-export type PaymentMethod = EsewaPaymentMethod | StripePaymentMethod;
+export type PaymentMethodUnion = EsewaPaymentMethod | StripePaymentMethod;
 
 // DTOs for requests
 export interface CreatePaymentMethodDto {
@@ -34,7 +34,7 @@ export interface CreatePaymentMethodDto {
   secretKey?: string;
   businessName?: string;
   isDefault?: boolean;
-  companyId: string;
+  companyId: number;
 }
 
 export interface UpdatePaymentMethodDto {

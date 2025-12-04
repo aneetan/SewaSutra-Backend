@@ -9,7 +9,7 @@ import { ProjectAttributes } from "../types/company/project.types";
 import projectRepository from "../repository/project.repository";
 import { authMiddleware } from "../middleware/authMiddleware";
 
-class RequirementController {
+class ProjectController {
    createProject = [
       verifyAccessToken,
       requireCompany,
@@ -50,7 +50,6 @@ class RequirementController {
 
             // Get the company of the user first
             const companyProjects = await projectRepository.getAllProjects(userId);
-            console.log(companyProjects)
 
             res.status(200).json({
             message: "Projects fetched successfully",
@@ -65,4 +64,4 @@ class RequirementController {
 
 }
 
-export default new RequirementController;
+export default new ProjectController;
