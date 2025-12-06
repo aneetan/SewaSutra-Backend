@@ -7,6 +7,7 @@ import requirementRouter from './routes/requirement.route';
 import { findMatches, runDemo, setupExamples } from './example/match.example';
 import pineconeService from './services/pinecone.services';
 import similarityRouter from './routes/similarity.route';
+import notificationRouter from './routes/notification.route';
 
 dotenv.config();
 
@@ -22,10 +23,7 @@ app.use('/auth', authRouter);
 app.use('/company', companyRouter);
 app.use('/client/requirement', requirementRouter);
 app.use('/client', similarityRouter);
-
-app.get('/notifications', (req, res) => {
-   res.sendFile(path.join(_))
-})
+app.use('/notification', notificationRouter);
 
 
 

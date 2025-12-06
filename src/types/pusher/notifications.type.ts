@@ -21,4 +21,5 @@ export type NotificationType =
   companyId?: number;
   requirementId?: number;
   notificationIds?: number[];
+  userName?: string;
 }

@@ -66,16 +66,16 @@ class NotificationController{
    sendQuoteRequest = [
       async(req:Request<{}, {}, NotificationData>, res: Response, next: NextFunction): Promise<void> => {
          try {
-            const { userId, quoteId, companyId } = req.body;
+            const { userId, userName, requirementId } = req.body;
 
-            if (!userId || !quoteId) {
+            if (!userId || !userName) {
                res.status(400).json({ 
                   success: false, 
                   error: 'UserId and quoteId are required' 
                });
             }
 
-            const notification = await notificationService.sendQuoteRequestSent(userId, quoteId, companyId);
+            const notification = await notificationService.sendQuoteRequestSent(userId, userName, requirementId);
 
             res.status(200).json({ 
                success: true, 

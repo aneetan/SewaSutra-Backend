@@ -1,6 +1,7 @@
 import PusherConfig from "../config/pusher.config";
 import companyRepository from "../repository/company.repository";
 import notificationRepository from "../repository/notification.repository";
+import requirementRepository from "../repository/requirement.repository";
 import { NotificationData, NotificationType } from "../types/pusher/notifications.type";
 
 export class NotificationService {
@@ -23,6 +24,7 @@ export class NotificationService {
         ...notification,
         timestamp: new Date()
       });
+      console.log(storedNotification)
 
       // Prepare notification data for Pusher
       const pusherData: NotificationData = {
@@ -121,13 +123,15 @@ export class NotificationService {
   /**
    * Helper method for specific notification types
    */
-  async sendQuoteRequestSent(userId: number, quoteId: number, companyId: number): Promise<NotificationData> {
-   const company = companyRepository.getCompanyById(companyId);
+  async sendQuoteRequestSent(userId: number, userName: string, requirementId: number): Promise<NotificationData> {
+   const requirement = await requirementRepository.getRequirementById(requirementId);
+
     return this.sendToUser(userId, {
       title: 'New Quote Request',
-      message: `You have a new quote request from ${(await company).name}`,
+      message: `You have a new quote request from ${userName}}`,
       type: 'quote_request_sent',
-      data: { quoteId }
+      data: { userId, userName, requirement, requirementId },
+      channel: "company_quote_request"
     });
   }
 
