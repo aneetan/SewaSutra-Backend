@@ -41,6 +41,13 @@ enum BidRequestStatus {
   DECLINED
 }
 
+enum BidStatus {
+  DECLINED
+  ACCEPTED
+  INITIATED
+  PENDING
+}
+
 enum NotificationType {
   quote_request_sent
   new_quote_created
@@ -199,6 +206,7 @@ model Bid {
   message       String?
   companyId     Int
   requirementId Int
+  status        BidStatus
   company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   requirement   Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())

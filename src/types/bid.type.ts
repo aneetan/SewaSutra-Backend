@@ -1,3 +1,5 @@
+type BidStatus = 'DECLINED' | 'ACCEPTED' | 'INITIATED' | 'PENDING'
+
 export interface BidRequestData {
    id: number;
   userId: number;
@@ -6,4 +8,16 @@ export interface BidRequestData {
   requestedAt: Date;
   status?: "SENT" | "DECLINED";
   userName?: string;
+}
+
+export interface BidData {
+  id?: number;
+  amount: number;
+  message: string;
+  deliveryTime: string;
+  companyId?: number;
+  requirementId?: number;
+  status?: BidStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

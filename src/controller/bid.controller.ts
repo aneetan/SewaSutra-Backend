@@ -1,10 +1,11 @@
 import { requireClient, requireCompany } from "../middleware/validateRole";
 import { NextFunction, Request, Response } from "express";
-import { BidRequestData } from "../types/bid.type";
+import { BidData, BidRequestData } from "../types/bid.type";
 import bidRepository from "../repository/bid.repository";
 import { errorResponse } from "../helpers/errorMsg.helper";
-import notificationController from "./notification.controller";
 import notificationService from "../services/notification.service";
+import requirementRepository from "../repository/requirement.repository";
+import companyRepository from "../repository/company.repository";
 
 
 class BidController {
@@ -51,24 +52,27 @@ class BidController {
    ]
 
    getBidRequestForCompany = [
-      requireCompany,
+      // requireCompany,
       async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction): Promise<void> => {
          try {
-            const { companyId } = req.body;
+            const { companyId } = req.query;
 
             if (!companyId) {
                res.status(400).json({ 
                   success: false, 
-                  error: 'CompanyId is required' 
+                  error: 'CompanyId is required as query parameter' 
                });
             }
 
-            const bids = await bidRepository.getBidRequestForCompany(companyId);
+            const bidRequests = await bidRepository.getBidRequestForCompany(Number(companyId));
 
             res.status(200).json({ 
                success: true, 
                message: `Bid fetch for company ${companyId}`,
-               bids
+               data: {
+                  bidRequests,
+                  count: bidRequests.length
+               }
             });
          } catch (error: any) {
             errorResponse(error, res, error.message || "Failed to fetch bids for company");
@@ -80,25 +84,108 @@ class BidController {
       requireClient,
       async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction): Promise<void> => {
          try {
-            const { requirementId } = req.body;
+            const { requirementId } = req.query;
 
             if (!requirementId) {
                res.status(400).json({ 
                   success: false, 
-                  error: 'CompanyId is required' 
+                  error: 'RequirementId is required as query parameter' 
                });
             }
 
-            const bids = await bidRepository.getBidRequestFprRequirement(requirementId);
+            const bids = await bidRepository.getBidRequestFprRequirement(Number(requirementId));
 
             res.status(200).json({ 
                success: true, 
                message: `Bid fetch for requirement ${requirementId}`,
-               bids
+               data: {
+                  bids,
+                  count: bids.length
+               }
             });
          } catch (error: any) {
             errorResponse(error, res, error.message || "Failed to fetch bids for company");
          }
+      }
+   ]
+
+   getRequirementsWithBidRequests = [
+      // requireCompany,
+      async (req: Request<{}, {}, {}, {companyId, requirementId, status, page, limit}>, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        const { companyId, status, page = 1, limit = 10 } = req.query;
+
+        if (!companyId) {
+          res.status(400).json({ 
+            success: false, 
+            error: 'CompanyId is required' 
+          });
+          return;
+        }
+
+        // Get requirements that have requested bids from this company
+        const result = await bidRepository.getRequirementsWithBidRequests({
+          companyId,
+          page: Number(page),
+          limit: Number(limit)
+        });
+
+        res.status(200).json({ 
+          success: true, 
+          message: `Requirements with bid requests fetched for company ${companyId}`,
+          data: result
+        });
+      } catch (error: any) {
+        errorResponse(error, res, error.message || "Failed to fetch requirements with bid requests");
+      }
+    }
+   ]
+
+   submitQuoteRequest = [
+      // requireClient,
+      async(req:Request<{}, {}, BidData>, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const { amount, deliveryTime, message, companyId, requirementId, status } = req.body;
+
+            const requirement = requirementRepository.getRequirementById(requirementId);
+            const company = companyRepository.getCompanyById(companyId);
+
+            const submittedQuote = {
+               amount,
+               deliveryTime,
+               message,
+               status,
+               companyId,
+               requirementId,
+               createdAt: new Date()
+            }
+
+            if (!companyId || !requirementId) {
+               res.status(400).json({ 
+                  success: false, 
+                  error: 'RequirementId and companyId are required' 
+               });
+            }
+
+            const newQuote = await bidRepository.createQuote(submittedQuote);
+
+            await notificationService.sendNewQuoteCreated(
+               (await requirement).userId,
+               newQuote.id, 
+               (await requirement).title,
+               (await company).name
+            );
+
+            res.status(200).json({ 
+               success: true, 
+               message: 'Bid request created successfully',
+                data: {
+                  quote: newQuote
+               }
+            });
+            } catch (error: any) {
+               errorResponse(error, res, error.message || "Failed to send quote request notifications");
+            }
       }
    ]
 }

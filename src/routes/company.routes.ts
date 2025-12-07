@@ -19,5 +19,8 @@ companyRouter.get('/payments', paymentController.getPaymentMethods)
 
 companyRouter.get('/bid-request', bidController.getBidRequestForCompany)
 
+companyRouter.get('/requirements-with-bids', bidController.getRequirementsWithBidRequests);
+companyRouter.post('/submit-quote', bidController.submitQuoteRequest);
+
 
 export default companyRouter;

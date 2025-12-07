@@ -1,5 +1,5 @@
 import prisma from "../config/dbconfig";
-import { BidRequestData } from "../types/bid.type";
+import { BidData, BidRequestData } from "../types/bid.type";
 
 class BidRepository {
    /**
@@ -35,6 +35,74 @@ class BidRepository {
       return bidRequests;
    }
 
+   async getRequirementsWithBidRequests(params: {
+      companyId: string;
+      status?: string;
+      page: number;
+      limit: number;
+   }) {
+      const { companyId, status, page, limit } = params;
+      const skip = (page - 1) * limit;
+
+      const companyIdNum = parseInt(companyId, 10);
+  
+
+      // Build where clause
+      const where: any = {
+         companyId: companyIdNum,
+      };
+
+      if (status) {
+         where.status = status;
+      }
+
+      try {
+         // CORRECT: count() should not have select parameter
+         const [requirements, total] = await Promise.all([
+            prisma.bidRequest.findMany({
+            where,
+            include: {
+               requirement: true,
+               company: true,
+            },
+            skip,
+            take: limit,
+            }),
+            prisma.bidRequest.count({ where }), // Just pass where, no select!
+         ]);
+
+         return {
+            requirements,
+            pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+            },
+         };
+      } catch (error: any) {
+         console.error('Error in getRequirementsWithBidRequests:', error);
+         throw new Error(`Database error: ${error.message}`);
+      }
+   }
+
+   /**
+   * Store quote in company
+   */
+  async createQuote(bid: Omit<BidData, 'id'>): Promise<BidData> {
+      const bidSubmitted =  await prisma.bid.create({
+        data: {
+          amount: bid.amount,
+          deliveryTime: bid.deliveryTime,
+          message: bid.message,
+          companyId: bid.companyId,
+          requirementId: bid.requirementId,
+          status: bid.status
+        }
+      });
+
+      return bidSubmitted;
+  }
 }
 
 export default new BidRepository();
