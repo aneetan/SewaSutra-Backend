@@ -31,6 +31,25 @@ class RequirementRepository {
          });                        
       }
 
+      async getRequirementByUserId(userId: number) {
+         return await prisma.requirement.findMany({
+            where: { userId },
+            include: {
+               bid: {
+               select: {
+                  id: true,
+                  amount: true,
+                  status: true,
+                  company: {
+                     select: { name: true }
+                  }
+               }
+               },
+               bidRequest: true
+            },
+            orderBy: { createdAt: 'desc' }
+         });
+      }
 }
 
 export default new RequirementRepository();

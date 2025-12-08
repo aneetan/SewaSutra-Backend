@@ -5,11 +5,13 @@ import { errorResponse } from "../helpers/errorMsg.helper";
 import { verifyAccessToken } from "../middleware/verifyAccessToken";
 import { requireClient } from "../middleware/validateRole";
 import { webhookService } from "../services/embedding/webhook.services";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { success } from "zod";
 
 class RequirementController {
    createRequirement = [
-      // verifyAccessToken,
-      // requireClient,
+      authMiddleware,
+      requireClient,
       async(req:Request<{}, {}, RequirementAttribute>, res: Response, next: NextFunction): Promise<void> => {
          try {
             const requirementDto = req.body;
@@ -45,9 +47,40 @@ class RequirementController {
       }
    ];
 
+   getRequirementForUser = [
+      authMiddleware,
+      requireClient,
+      async(req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+
+            if (!userId) {
+               res.status(400).json({
+                  success: false,
+                  error: "userId is required"
+               });
+               return;
+            }
+
+            const requirements = await requirementRepository.getRequirementByUserId(userId);
+
+            res.status(200).json({
+               success: true,
+               requirements: requirements
+            });
+
+         } catch (e) {
+            errorResponse(e, res, "Error getting requirement for userId");
+            next(e);
+         }
+      }
+   ];
+
     // Find matching companies for a requirement
    findMatchingCompanies = [
-      // verifyAccessToken,
+      authMiddleware,
+      verifyAccessToken,
       async(req: Request, res: Response, next: NextFunction): Promise<void> => {
          try {
             const { requirementId } = req.params;
@@ -79,6 +112,8 @@ class RequirementController {
          }
       }
    ];
+
+
 }
 
 export default new RequirementController;

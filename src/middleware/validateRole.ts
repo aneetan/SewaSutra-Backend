@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 export const requireRole = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = res.locals.user;
+      const user = (req as any).user;
       
       if (!user) {
         return res.status(401).json({ error: "User not authenticated" });
