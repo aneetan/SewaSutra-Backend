@@ -22,5 +22,7 @@ companyRouter.get('/bid-request', bidController.getBidRequestForCompany)
 companyRouter.get('/requirements-with-bids', bidController.getRequirementsWithBidRequests);
 companyRouter.post('/submit-quote', bidController.submitQuoteRequest);
 
+companyRouter.get('/bid-status/:requirementId', bidController.checkCompanyBidStatus);
+
 
 export default companyRouter;
