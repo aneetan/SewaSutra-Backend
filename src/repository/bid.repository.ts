@@ -184,6 +184,23 @@ class BidRepository {
       });
    }
 
+   async findBidByCompanyAndRequirement(companyId: number, requirementId: number) {
+      return await prisma.bid.findFirst({
+         where: {
+            companyId,
+            requirementId
+         },
+         select: {
+            id: true,
+            status: true,
+            amount: true,
+            createdAt: true,
+            updatedAt: true
+         }
+      });
+   };
+
+
 
 }
 

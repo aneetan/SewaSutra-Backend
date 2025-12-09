@@ -274,6 +274,41 @@ class BidController {
       }
    ]
 
+   checkCompanyBidStatus = [
+      authMiddleware,
+      requireCompany,
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const request = req as Request & { userId: string };
+            const companyId = Number(request.userId);
+            const { requirementId } = req.params;
+
+            if (!requirementId) {
+               res.status(400).json({ error: "requirementId is required" });
+            }
+
+            // Check if bid exists
+            const existingBid = await bidRepository.findBidByCompanyAndRequirement(
+               Number(companyId),
+               Number(requirementId)
+            );
+
+            res.status(200).json({
+               hasSubmitted: !!existingBid,
+               bid: existingBid ? {
+                  id: existingBid.id,
+                  status: existingBid.status,
+                  amount: existingBid.amount,
+                  submittedAt: existingBid.createdAt
+               } : null
+            });
+
+         } catch (error: any) {
+            errorResponse(error, res, error.message || "Failed to check bid status");
+         }
+      }
+   ];
+
 
 }
 
