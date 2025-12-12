@@ -23,24 +23,6 @@ app.use('/auth', authRouter);
 app.use('/company', companyRouter);
 app.use('/client', clientRouter);
 app.use('/notification', notificationRouter);
-let messages = [];
-
-app.get("/api/messages", (req, res) => {
-  res.json(messages);
-});
-
-app.post("/api/messages", (req, res) => {
-  const { message } = req.body;
-  if (!message) return res.status(400).json({ error: "Message is required" });
-
-  const newMessage = { message, timestamp: new Date() };
-  messages.push(newMessage);
-
-  // Trigger Pusher event
-  PusherConfig.trigger("chat-channel", "new-message", { message: newMessage.message });
-
-  res.status(201).json(newMessage);
-});
 
 app.get('/', async(req: Request, res: Response) => {
    res.json({ message: 'Hello from ProLink' });

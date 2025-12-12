@@ -8,4 +8,10 @@ const PusherConfig =new Pusher({
       useTLS: true
 });
 
+export const pusherChannels = {
+  PRESENCE: 'presence-chat',
+  PRIVATE: (userId: string) => `private-user-${userId}`,
+  CONVERSATION: (conversationId: string) => `private-conversation-${conversationId}`
+};
+
 export default PusherConfig;

@@ -214,3 +214,4 @@ model Bid {
 
    @@unique([requirementId, companyId])
 }
+
