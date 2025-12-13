@@ -84,7 +84,7 @@ class ChatController {
       try {
          const request = req as Request & { userId: string };
          const userId = Number(request.userId);
-         
+
          const { receiverId, content, attachments = [] }: SendMessageDto = req.body;
          
          // Get or create chat
@@ -92,18 +92,15 @@ class ChatController {
          
          // Send message
          const message = await chatRepository.sendMessage(chat.id, userId, content, attachments);
-         
-         // Trigger real-time event
-         await chatService.triggerMessageSent(chat.id, message);
-         
-         // Get receiver's presence to check if online
-         const receiverPresence = await chatRepository.getUserPresence(receiverId);
-         
+      
+                  
          res.json({
             message,
             chatId: chat.id,
-            receiverOnline: receiverPresence?.isOnline || false,
          });
+
+         // Trigger real-time event
+         chatService.triggerMessageSent(chat.id, message);
       } catch (error: any) {
          res.status(400).json({ error: error.message });
       }
