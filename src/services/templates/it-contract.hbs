@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>IT Service Contract</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+    }
+    .section {
+      margin-top: 24px;
+    }
+    .highlight {
+      background: #f4f6f8;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .signature {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 70px;
+    }
+    .sign {
+      width: 45%;
+      text-align: center;
+    }
+    .line {
+      margin-top: 50px;
+      border-top: 1px solid #000;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>IT Services Agreement</h1>
+
+<p>
+This agreement is entered on <strong>{{contractDate}}</strong> between:
+</p>
+
+<div class="highlight">
+  <p><strong>Client:</strong> {{clientName}}</p>
+  <p><strong>Service Provider:</strong> {{companyName}}</p>
+</div>
+
+<div class="section">
+  <h2>1. Scope of IT Services</h2>
+  <ul>
+    <li>Software development / maintenance</li>
+    <li>Web & mobile application services</li>
+    <li>System integration & API development</li>
+    <li>Technical support & maintenance</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>2. Deliverables & Timeline</h2>
+  <p><strong>Project:</strong> {{projectName}}</p>
+  <p><strong>Duration:</strong> {{startDate}} – {{endDate}}</p>
+</div>
+
+<div class="section">
+  <h2>3. Confidentiality</h2>
+  <p>
+    Both parties agree to maintain confidentiality of business,
+    technical, and personal data.
+  </p>
+</div>
+
+<div class="section">
+  <h2>4. Payment</h2>
+  <p>Total Cost: <strong>Rs. {{amount}}</strong></p>
+</div>
+
+<div class="signature">
+  <div class="sign">
+    <div class="line"></div>
+    <p><strong>{{clientName}}</strong></p>
+    <p>Client Signature</p>
+  </div>
+
+  <div class="sign">
+    <div class="line"></div>
+    <p><strong>{{companyName}}</strong></p>
+    <p>Company Signature</p>
+  </div>
+</div>
+
+</body>
+</html>
