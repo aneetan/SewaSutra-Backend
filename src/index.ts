@@ -9,6 +9,7 @@ import notificationRouter from './routes/notification.route';
 import clientRouter from './routes/client.route';
 import PusherConfig from './config/pusher.config';
 import chatRouter from './routes/chat.routes';
+import contractRouter from './routes/contract.route';
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.use('/company', companyRouter);
 app.use('/client', clientRouter);
 app.use('/notification', notificationRouter);
 app.use('/chat', chatRouter);
+app.use('/contract', contractRouter);
+
 
 
 

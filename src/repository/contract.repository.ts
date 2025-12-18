@@ -1,6 +1,7 @@
 import prisma from "../config/dbconfig";
 import { ContractWithRelations, CreateProjectFormData } from "../types/contract.type";
 import { generateProjectId } from "../utils/projectId.util";
+import companyRepository from "./company.repository";
 
 class ContractRepository {
    /**
@@ -8,6 +9,8 @@ class ContractRepository {
    */
   async createContractTable(data: CreateProjectFormData): Promise<ContractWithRelations> {
       const projectId = generateProjectId();
+
+      const company = companyRepository.getCompanyByUser(data.companyId);
 
       const newContract = await prisma.contract.create({
         data: {
@@ -21,7 +24,7 @@ class ContractRepository {
           scopeSummary: data.scopeSummary,
           status: 'PENDING_SIGNATURE',
           paymentStatus: 'PENDING',
-          companyId: data.companyId,
+          companyId: (await company).id,
           clientId: data.clientId,
           requirementId: data.requirementId,
         },
