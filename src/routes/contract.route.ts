@@ -9,6 +9,7 @@ contractRouter.use(authMiddleware);
 contractRouter.post("/create", contractController.createContract)
 contractRouter.post('/:contractId/accept', contractController.acceptContract);
 contractRouter.get('/client/request', contractController.getContractRequestsForClient);
+contractRouter.post('/:contractId/decline', contractController.declineContract);
 
 
 export default contractRouter;

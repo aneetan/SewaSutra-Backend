@@ -52,6 +52,25 @@ class ContractRepository {
          }
       }
    ]
+
+   declineContract = [
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const contractId = Number(req.params.contractId);
+
+            // 1. Activate contract + expire bids
+            await contractRepository.declineContractByClient(contractId);
+
+            res.status(200).json({
+               message: "Contract declined",
+            });
+         } catch (error: any) {
+            res.status(500).json({
+               message: error.message || "Failed to decline contract",
+            });
+         }
+      }
+   ]
    
 
    getContractRequestsForClient  = [
