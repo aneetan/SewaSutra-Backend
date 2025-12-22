@@ -93,6 +93,26 @@ class ContractRepository {
       }
    ]
 
+   getAcceptedContractsForClient  = [
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const request = req as Request & { userId: string };
+            const clientId = Number(request.userId);
+
+            const acceptedContracts =await contractRepository.getAcceptedContractsForClient(clientId);
+            res.status(200).json({
+               message: "Accepted contract requests fetched successfully",
+               data: acceptedContracts,
+            });
+
+         } catch (error: any) {
+            res.status(500).json({
+               message: error.message || "Failed to fetch contract requests",
+            });
+         }
+      }
+   ]
+
 }
 
 export default new ContractRepository();
