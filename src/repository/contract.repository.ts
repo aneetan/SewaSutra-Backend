@@ -100,18 +100,39 @@ class ContractRepository {
          where: {
             clientId,
             status: {
-            in: ["ACTIVE", "COMPLETED", "PENDING_SIGNATURE"],
+            in: ["ACTIVE", "COMPLETED"], 
             },
          },
          include: {
-            company: true,
-            requirement: true,
+            company: {
+            select: {
+               id: true,
+               name: true,
+            },
+            },
+            client: {
+            select: {
+               id: true,
+               name: true,
+               email: true,
+            },
+            },
+            requirement: {
+            select: {
+               id: true,
+               title: true,
+               description: true,
+               category: true,
+               workType: true
+            },
+            },
          },
          orderBy: {
             createdAt: "desc",
          },
       });
    }
+
 
    async getPendingContractsForClient(clientId: number) {
       return await prisma.contract.findMany({

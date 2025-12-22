@@ -60,7 +60,7 @@ export async function generateContractDocument(contractId: number) {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "contracts",
-        resource_type: "auto", // IMPORTANT for PDF
+        resource_type: "auto",
         public_id: `contract-${contract.projectId}`,
       },
       (error, result) => {
