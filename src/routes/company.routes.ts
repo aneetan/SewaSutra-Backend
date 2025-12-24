@@ -8,6 +8,7 @@ const companyRouter = Router();
 
 
 companyRouter.post('/create', companyController.createCompany);
+companyRouter.get('/:companyId/profile', companyController.getCompanyProfile)
 
 //Projects
 companyRouter.post('/add-project', projectController.createProject)
