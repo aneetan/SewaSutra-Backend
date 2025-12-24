@@ -65,6 +65,51 @@ class CompanyRepository {
       const company = await prisma.company.findFirst({ where: { id } });
       return company;
    }
+
+   async getCompanyProfileById(companyId: number) {
+      return await prisma.company.findUnique({
+         where: { id: companyId },
+         include: {
+            services: {
+            select: {
+               service: true,
+            },
+            },
+            docs: {
+               select: {
+                  logo: true,
+               },
+            },
+            user: {
+               select: {
+                  status: true,
+               }
+            }
+         },
+      });
+   }
+
+   async isCompanyUser(userId: number): Promise<boolean> {
+      const user = await prisma.user.findUnique({
+         where: { id: userId },
+         select: {
+            role: true,
+            companies: {
+            select: { id: true },
+            take: 1,
+            },
+         },
+      });
+
+      if (!user) return false;
+
+      return user.role === "COMPANY" && user.companies.length > 0;
+   }
+
+
+
+
+
 }
 
 export default new CompanyRepository();

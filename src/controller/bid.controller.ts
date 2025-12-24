@@ -309,6 +309,42 @@ class BidController {
       }
    ];
 
+   getCompanySubmittedBids =[
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const request = req as Request & { userId: string };
+            const companyId = Number(request.userId);
+
+            // Check if bid exists
+            const bids = await bidRepository.getBidsSubmittedByCompany(companyId);
+
+            const formatted = bids.map((bid) => ({
+               bidId: bid.id,
+               bidStatus: bid.status,
+               bidPrice: bid.amount,
+               deliveryTime: bid.deliveryTime,
+               message: bid.message,
+               submittedAt: bid.createdAt,
+
+               requirement: {
+                  requirementId: bid.requirement.id,
+                  title: bid.requirement.title,
+                  description: bid.requirement.description,
+                  budgetRange: `${bid.requirement.minimumBudget} - ${bid.requirement.maximumBudget}`,
+                  postedAt: bid.requirement.createdAt,
+               },
+            }));
+
+            res.status(201).json({
+               totalBids: formatted.length,
+               bids: formatted,
+            });
+
+         } catch (error: any) {
+            errorResponse(error, res, error.message || "Failed to fetch bids");
+         }
+      }
+   ]
 
 }
 

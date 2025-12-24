@@ -7,6 +7,7 @@ import companyRepository from "../repository/company.repository";
 import { errorResponse } from "../helpers/errorMsg.helper";
 import { parseJSONField } from "../helpers/parseJsonField";
 import { webhookService } from "../services/embedding/webhook.services";
+import { resendOTPSchema } from "../schemas/otp.schema";
 
 class CompanyController {
    createCompany = [
@@ -63,6 +64,49 @@ class CompanyController {
 
       }
    ]
+
+   getCompanyProfile = [
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
+         const companyId = Number(req.params.companyId);
+         const company = await companyRepository.getCompanyProfileById(companyId);
+
+         if (!company) {
+            res.status(404).json({ message: "Company not found" });
+         }
+
+         const response = {
+               companyInfo: {
+                  name: company.name,
+                  registrationNo: company.registrationNo,
+                  description: company.description,
+                  establishedYear: company.establishedYear,
+                  serviceCategory: company.serviceCategory,
+                  websiteUrl: company.websiteUrl,
+               },
+               servicePricing: {
+                  servicesOffered: company.services.map((s: any) => s.service),
+                  priceRangeMin: company.priceRangeMin,
+                  priceRangeMax: company.priceRangeMax,
+                  avgDeliveryTime: company.avgDeliveryTime,
+               },
+               logo: company.docs?.[0]?.logo,
+               status: company.user.status
+            };
+         res.status(201).json(response);
+      }
+   ]
+
+   hasCompanyData = [
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
+         const request = req as Request & { userId: string };
+         const userId = Number(request.userId);
+
+         const isCompany = await companyRepository.isCompanyUser(userId);
+         res.status(201).json({ isCompany });
+      }
+   ]
+
+
 
 }
 

@@ -201,6 +201,31 @@ class BidRepository {
    };
 
 
+    async getBidsSubmittedByCompany(companyId: number) {
+    return await prisma.bid.findMany({
+      where: {
+        companyId,
+      },
+      include: {
+        requirement: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            maximumBudget: true,
+            minimumBudget: true,
+            user: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+
 
 }
 
