@@ -346,6 +346,37 @@ class BidController {
       }
    ]
 
+   revokeBidByCompany = [
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const bidId = Number(req.params.bidId);
+            const request = req as Request & { userId: string };
+            const companyId = Number(request.userId);
+
+            const bid = await bidRepository.getBidById(bidId);
+
+            if (!bid) {
+               res.status(404).json({ message: "Bid not found" });
+            }
+
+            // 🔐 Status check
+            if (bid.status !== "PENDING") {
+               res
+               .status(400)
+               .json({ message: "Only pending bids can be revoked" });
+            }
+
+            await bidRepository.revokeBid(bidId);
+
+            res.json({ message: "Bid revoked successfully" });
+
+         } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Failed to revoke bid" });
+         }
+      }
+   ]
+
 }
 
 export default new BidController();

@@ -202,28 +202,44 @@ class BidRepository {
 
 
     async getBidsSubmittedByCompany(companyId: number) {
-    return await prisma.bid.findMany({
-      where: {
-        companyId,
-      },
-      include: {
-        requirement: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            maximumBudget: true,
-            minimumBudget: true,
-            user: true,
-            createdAt: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-  }
+      return await prisma.bid.findMany({
+         where: {
+         companyId,
+         },
+         include: {
+         requirement: {
+            select: {
+               id: true,
+               title: true,
+               description: true,
+               maximumBudget: true,
+               minimumBudget: true,
+               user: true,
+               createdAt: true,
+            },
+         },
+         },
+         orderBy: {
+         createdAt: "desc",
+         },
+      });
+   }
+
+   async getBidById(bidId: number) {
+      return prisma.bid.findUnique({
+         where: { id: bidId },
+      });
+   }
+
+   async revokeBid(bidId: number) {
+      return prisma.bid.update({
+         where: { id: bidId },
+         data: {
+            status: "DECLINED",
+         },
+      });
+   }
+
 
 
 

@@ -26,6 +26,7 @@ companyRouter.get('/bid-request', bidController.getBidRequestForCompany)
 companyRouter.get('/requirements-with-bids', bidController.getRequirementsWithBidRequests);
 companyRouter.post('/submit-quote', bidController.submitQuoteRequest);
 companyRouter.get('/submitted-quote', bidController.getCompanySubmittedBids);
+companyRouter.put('/:bidId/revoke', bidController.revokeBidByCompany);
 
 
 companyRouter.get('/bid-status/:requirementId', bidController.checkCompanyBidStatus);
