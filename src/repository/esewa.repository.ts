@@ -8,6 +8,8 @@ class EsewaRepository {
     companyId: number;
     amount: number;
     transactionId: string;
+    commission: number,
+    companyAmount: number,
     gatewayPayload: any;
   }) {
     return prisma.appPayment.create({
@@ -20,6 +22,8 @@ class EsewaRepository {
         contractId: data.contractId,
         clientId: data.clientId,
         companyId: data.companyId,
+        commission: data.commission,
+        companyAmount: data.companyAmount,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

@@ -357,6 +357,9 @@ model AppPayment {
   transactionId     String
   gatewayPayload    Json?
 
+  commission        Float
+  companyAmount     Float
+
   contractId        Int
   contract          Contract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
 

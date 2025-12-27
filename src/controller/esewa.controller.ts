@@ -11,6 +11,9 @@ class EsewaController {
    initiate = [
       async (req: Request, res: Response, next: NextFunction) => {
          const { amount, contractId } = req.body;
+         const commissionRate = 0.1;
+         const adminCommission = amount * commissionRate;
+         const vendorAmount = amount - adminCommission;
 
          if (!amount || !contractId) {
             res.status(400).json({
@@ -66,6 +69,8 @@ class EsewaController {
                   amount,
                   transactionId: transactionId,
                   gatewayPayload: payload,
+                  commission: adminCommission,
+                  companyAmount: vendorAmount
                })
                res.send({
                   data: {
@@ -101,7 +106,6 @@ class EsewaController {
          // GET request for sandbox
          const response = await axios.get(esewaConfig.statusCheckUrl, { params });
          const responseData = response.data as { status: string; ref_id: string };
-         console.log(responseData)
 
          if (responseData.status === "COMPLETE") {
             await esewaRepository.verifyPayment(payment.transactionId, responseData.ref_id, "")
