@@ -172,6 +172,36 @@ class ContractRepository {
       });
    }
 
+   async updatePaymentForContract(contractId: number) {
+      // Fetch the contract
+      const contract = await prisma.contract.findUnique({
+         where: { id: contractId },
+      });
+
+      if (!contract) throw new Error("Contract not found");
+
+      // Decide new status
+      let newStatus: "PARTIALLY_PAID" | "FULLY_PAID";
+
+      if (contract.paymentStatus === "PENDING") {
+         newStatus = "PARTIALLY_PAID";
+      } else if(contract.paymentStatus === "PARTIALLY_PAID") {
+         newStatus = "FULLY_PAID";
+      }
+
+      // Update contract status
+      const updatedContract = await prisma.contract.update({
+         where: { id: contractId },
+         data: {
+            paymentStatus: newStatus,
+            updatedAt: new Date(),
+         },
+      });
+
+      return updatedContract;
+   }
+
+
 
 
 }

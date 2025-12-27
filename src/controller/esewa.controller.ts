@@ -6,6 +6,8 @@ import { generateHmacSha256Hash, safeStringify } from "../utils/esewa/generateHa
 import { EsewaSignedPayload } from "../types/esewa.type";
 import axios from "axios";
 import { parseStringPromise } from "xml2js";
+import contractRepository from "../repository/contract.repository";
+import notificationService from "../services/notification.service";
 
 class EsewaController {
    initiate = [
@@ -108,8 +110,17 @@ class EsewaController {
          const responseData = response.data as { status: string; ref_id: string };
 
          if (responseData.status === "COMPLETE") {
-            await esewaRepository.verifyPayment(payment.transactionId, responseData.ref_id, "")
-            res.status(200).json({ status: responseData.status, ref_id: responseData.ref_id });
+            await esewaRepository.verifyPayment(payment.transactionId, responseData.ref_id, "");
+            await contractRepository.updatePaymentForContract(payment.contractId);
+            res.status(200).json({
+               status: responseData.status,
+               ref_id: responseData.ref_id,
+               transactionId: payment.transactionId,
+               amount: payment.amount,
+               companyAmount: payment.companyAmount,
+               commission: payment.commission 
+            });
+            await notificationService.sendPaymentReceived(payment.clientId, payment.id, payment.companyAmount)
          } else {
             res.status(400).json({ message: "Payment verification failed" });
          }
