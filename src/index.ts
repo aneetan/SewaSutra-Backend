@@ -12,6 +12,7 @@ import chatRouter from './routes/chat.routes';
 import contractRouter from './routes/contract.route';
 import paymentRouter from './routes/payment.route';
 import reviewRouter from './routes/review.route';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -20,7 +21,9 @@ const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 pineconeService.initialize();
 

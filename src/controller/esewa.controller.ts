@@ -1,92 +1,135 @@
 import { NextFunction, Request, Response } from "express";
-import { esewaService } from "../services/payment/esewa.service";
 import { esewaRepository } from "../repository/esewa.repository";
 import { esewaConfig } from "../config/esewa.config";
+import prisma from "../config/dbconfig";
+import { generateHmacSha256Hash, safeStringify } from "../utils/esewa/generateHash";
+import { EsewaSignedPayload } from "../types/esewa.type";
+import axios from "axios";
+import { parseStringPromise } from "xml2js";
+import contractRepository from "../repository/contract.repository";
+import notificationService from "../services/notification.service";
 
 class EsewaController {
    initiate = [
       async (req: Request, res: Response, next: NextFunction) => {
-         try {
-            const request = req as Request & { userId: string };
-            const clientId = Number(request.userId);
+         const { amount, contractId } = req.body;
+         const commissionRate = 0.1;
+         const adminCommission = amount * commissionRate;
+         const vendorAmount = amount - adminCommission;
 
-            const { contractId, amount } = req.body;
-
-            const result = await esewaService.initiatePayment({
-               contractId,
-               clientId,
-               amount,
+         if (!amount || !contractId) {
+            res.status(400).json({
+               message: "amount and contractId are required",
             });
+         }
 
-            // provide a backend redirect URL which will POST the saved payload to Esewa
-            const transactionId = (result.payload as any).transaction_uuid;
-            const redirectUrl = `${process.env.BACKEND_URL || ""}/payment/esewa/redirect/${transactionId}`;
+         const request = req as Request & { userId: string };
+         const clientId = Number(request.userId);
 
-            res.json({ transactionId, redirectUrl, paymentUrl: result.paymentUrl, payload: result.payload });
-         } catch(e) {
-            console.log(e);
-            res.status(500).json({ error: "Failed to initiate payment" });
+         const contract = await prisma.contract.findUnique({
+            where: { id: contractId },
+         });
+         if (!contract) throw new Error("Contract not found");
+
+         const transactionId = `TXN-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+         
+         let paymentData = {
+            amount,
+            failure_url: esewaConfig.failureUrl,
+            product_delivery_charge: "0",
+            product_service_charge: "0",
+            product_code: esewaConfig.merchantCode,
+            signed_field_names: "total_amount,transaction_uuid,product_code",
+            success_url: esewaConfig.successUrl,
+            tax_amount: "0",
+            total_amount: amount,
+            transaction_uuid: transactionId,
+            signature: ""
+         };
+
+         const data = `total_amount=${paymentData.total_amount},transaction_uuid=${paymentData.transaction_uuid},product_code=${paymentData.product_code}`;
+
+         const signature = generateHmacSha256Hash(data, esewaConfig.secretKey); 
+
+         paymentData = { ...paymentData, signature };
+
+         const payload: EsewaSignedPayload = {
+            ...paymentData,
+            signature,
+         };
+
+         try {
+            const payment = await axios.post(esewaConfig.paymentUrl, null, {
+               params: paymentData,
+            });
+            const reqPayment = JSON.parse(safeStringify(payment));
+            if (reqPayment.status === 200) {
+               await esewaRepository.createPayment({
+                  contractId,
+                  clientId,
+                  companyId: contract.companyId,
+                  amount,
+                  transactionId: transactionId,
+                  gatewayPayload: payload,
+                  commission: adminCommission,
+                  companyAmount: vendorAmount
+               })
+               res.send({
+                  data: {
+                     ...paymentData,
+                     url: reqPayment.request.res.responseUrl,
+                  }
+               });
+            }
+         } catch (error) {
+            res.send(error);
+            console.log(error)
          }
       }
    ]
 
-   // Renders an auto-submitting POST form that forwards the saved payload to Esewa (avoids client doing GET to Esewa endpoint)
-   redirect = async (req: Request, res: Response) => {
-      const { transactionId } = req.params as { transactionId: string };
+   verifyPayment = [
+   async (req: Request, res: Response, next: NextFunction) => {
+      const { paymentId } = req.body;
 
-      const payment = await esewaRepository.findByTransactionId(transactionId);
-      if (!payment) return res.status(404).send("Payment not found");
-
-      const payload = payment.gatewayPayload || {};
-      const action = esewaConfig.paymentUrl;
-
-      const inputs = Object.entries(payload)
-         .map(([k, v]) => `<input type="hidden" name="${k}" value="${String(v).replace(/"/g, '&quot;')}" />`)
-         .join("\n");
-
-      const html = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>Redirecting to Esewa</title></head>
-  <body onload="document.forms[0].submit()">
-    <form method="POST" action="${action}">
-      ${inputs}
-      <noscript>
-        <p>JavaScript is required to continue to the payment gateway. Click the button below to continue.</p>
-        <button type="submit">Continue to payment</button>
-      </noscript>
-    </form>
-  </body>
-</html>`;
-
-      res.setHeader("Content-Type", "text/html");
-      res.send(html);
-   };
-
-   success = [
-      async (req: Request, res: Response, next: NextFunction) => {
-         // Esewa may POST form data or redirect back with query params; accept both
-         const transaction_uuid = (req.body && req.body.transaction_uuid) || (req.query && (req.query.transaction_uuid as string));
-         const refId = (req.body && (req.body.refId || req.body.refid)) || (req.query && (req.query.refId || req.query.refid));
-
-         if (!transaction_uuid) {
-            return res.status(400).send("Missing transaction id");
+      try {
+         const payment = await esewaRepository.findByPaymentId(paymentId);
+         if (!payment) {
+            res.status(400).json({ message: "Transaction not found" });
          }
 
-         const ok = await esewaService.verifyPayment(transaction_uuid as string, (refId as string) || "");
+         // Build query params
+         const params = {
+            total_amount: payment.amount.toString(),
+            transaction_uuid: payment.transactionId,
+            product_code: "EPAYTEST",
+         };
 
-         res.redirect(
-            ok
-            ? `${process.env.FRONTEND_URL}/payment-success`
-            : `${process.env.FRONTEND_URL}/payment-failed`
-         );
+         // GET request for sandbox
+         const response = await axios.get(esewaConfig.statusCheckUrl, { params });
+         const responseData = response.data as { status: string; ref_id: string };
+
+         if (responseData.status === "COMPLETE") {
+            await esewaRepository.verifyPayment(payment.transactionId, responseData.ref_id, "");
+            await contractRepository.updatePaymentForContract(payment.contractId);
+            res.status(200).json({
+               status: responseData.status,
+               ref_id: responseData.ref_id,
+               transactionId: payment.transactionId,
+               amount: payment.amount,
+               companyAmount: payment.companyAmount,
+               commission: payment.commission 
+            });
+            await notificationService.sendPaymentReceived(payment.clientId, payment.id, payment.companyAmount)
+         } else {
+            res.status(400).json({ message: "Payment verification failed" });
+         }
+      } catch (e) {
+         console.error("Payment verification error:", e);
+         res.status(500).json({ message: "Error verifying transaction" });
       }
-   ]
-
-   failure = async (req: Request, res: Response) => {
-      const transaction_uuid = (req.body && req.body.transaction_uuid) || (req.query && (req.query.transaction_uuid as string));
-      if (transaction_uuid) await esewaRepository.markFailed(transaction_uuid as string);
-      res.redirect(`${process.env.FRONTEND_URL}/payment-failed`);
-   };
+   },
+   ];
 }
 
 export default new EsewaController();
