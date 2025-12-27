@@ -33,13 +33,19 @@ class EsewaRepository {
     });
   }
 
-  markSuccess(transactionId: string, refId: string, payload: any) {
+  findByPaymentId(paymentId: number) {
+    return prisma.appPayment.findFirst({
+      where: { id: paymentId },
+      include: { contract: true },
+    });
+  }
+
+  verifyPayment(transactionId: string, refId: string, payload: any) {
     return prisma.appPayment.updateMany({
       where: { transactionId },
       data: {
         status: StatusForPayment.SUCCESS,
         gatewayRefId: refId,
-        gatewayPayload: payload,
         updatedAt: new Date(),
       },
     });

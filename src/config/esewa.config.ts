@@ -5,4 +5,5 @@ export const esewaConfig = {
   successUrl: process.env.ESEWA_SUCCESS_URL!,
   failureUrl: process.env.ESEWA_FAILED_URL!,
   verifyUrl: process.env.ESEWA_VERIFY_URL!,
+  statusCheckUrl: process.env.ESEWA_STATUS_CHECK_URL!
 };
