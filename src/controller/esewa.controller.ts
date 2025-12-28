@@ -5,9 +5,9 @@ import prisma from "../config/dbconfig";
 import { generateHmacSha256Hash, safeStringify } from "../utils/esewa/generateHash";
 import { EsewaSignedPayload } from "../types/esewa.type";
 import axios from "axios";
-import { parseStringPromise } from "xml2js";
 import contractRepository from "../repository/contract.repository";
 import notificationService from "../services/notification.service";
+import { PaymentType } from "@prisma/client";
 
 class EsewaController {
    initiate = [
@@ -72,7 +72,8 @@ class EsewaController {
                   transactionId: transactionId,
                   gatewayPayload: payload,
                   commission: adminCommission,
-                  companyAmount: vendorAmount
+                  companyAmount: vendorAmount,
+                  gateway: PaymentType.ESEWA
                })
                res.send({
                   data: {
