@@ -10,5 +10,6 @@ adminRouter.patch("/company/:companyId/decline", adminController.declineCompany)
 adminRouter.get("/companies", adminController.getAllCompanies);
 adminRouter.get("/companies/:companyId/projects", adminController.getProjectsByCompanyId);
 adminRouter.get("/companies/:companyId/payments", adminController.getPaymentsByCompanyId);
+adminRouter.get("/companies/:companyId/docs", adminController.getDocsByCompanyId);
 
 export default adminRouter;

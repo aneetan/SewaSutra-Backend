@@ -149,13 +149,21 @@ class CompanyRepository {
          },
          include: {
             user: true,
-            docs: true,
-            review: true
-         },
+            docs: true
+         }
       });
 
       return companies;
    }
+
+   async getAllDocsForCompany(companyId: number) {
+      const docs = await prisma.companyDocs.findFirst({
+         where: { companyId },
+      });
+
+      return docs;
+   }
+
 
 }
 

@@ -114,6 +114,31 @@ class AdminController {
       },
    ];
 
+   getDocsByCompanyId = [
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const companyId = Number(req.params.companyId);
+
+            if (!companyId) {
+               res.status(400).json({ message: "Invalid company id" });
+               return;
+            }
+
+            const docs = await companyRepository.getAllDocsForCompany(
+               companyId
+            );
+
+            res.status(200).json({
+               message: "Payment fetched successfully",
+               data: docs,
+            });
+         } catch (e) {
+            errorResponse(e, res, "Error fetching projects");
+            next(e);
+         }
+      },
+   ];
+
 }
 
 export default new AdminController;
