@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import prisma from "../config/dbconfig";
 import companyController from "./company.controller";
 import companyRepository from "../repository/company.repository";
+import projectRepository from "../repository/project.repository";
+import { errorResponse } from "../helpers/errorMsg.helper";
+import paymentRepository from "../repository/payment.repository";
 
 class AdminController {
    approveCompany = [
@@ -45,6 +48,71 @@ class AdminController {
          }
       }   
    ]
+
+   getAllCompanies = [
+      async (req: Request, res: Response, next: NextFunction) => {
+         try {
+            const companies = await companyRepository.getAllCompanies();
+
+            res.status(200).json({
+               message: "Company data found",
+               data: companies,
+            });
+         } catch (error) {
+            next(error);
+         }
+      } 
+   ]
+
+   getProjectsByCompanyId = [
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const companyId = Number(req.params.companyId);
+
+            if (!companyId) {
+               res.status(400).json({ message: "Invalid company id" });
+               return;
+            }
+
+            const projects = await projectRepository.getAllProjectsByCompanyId(
+               companyId
+            );
+
+            res.status(200).json({
+               message: "Projects fetched successfully",
+               data: projects,
+            });
+         } catch (e) {
+            errorResponse(e, res, "Error fetching projects");
+            next(e);
+         }
+      },
+   ];
+
+   getPaymentsByCompanyId = [
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const companyId = Number(req.params.companyId);
+
+            if (!companyId) {
+               res.status(400).json({ message: "Invalid company id" });
+               return;
+            }
+
+            const payment = await paymentRepository.getAllPaymentsByCompanyId(
+               companyId
+            );
+
+            res.status(200).json({
+               message: "Payment fetched successfully",
+               data: payment,
+            });
+         } catch (e) {
+            errorResponse(e, res, "Error fetching projects");
+            next(e);
+         }
+      },
+   ];
 
 }
 

@@ -142,6 +142,21 @@ class CompanyRepository {
       });
    }
 
+   async getAllCompanies () {
+      const companies = await prisma.company.findMany({
+         orderBy: {
+            createdAt: "desc",
+         },
+         include: {
+            user: true,
+            docs: true,
+            review: true
+         },
+      });
+
+      return companies;
+   }
+
 }
 
 export default new CompanyRepository();

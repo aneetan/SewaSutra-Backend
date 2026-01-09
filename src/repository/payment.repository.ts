@@ -245,6 +245,14 @@ class PaymentRepository {
 
     return payment ? this.toPaymentMethodUnion(payment) : null;
   }
+
+  async getAllPaymentsByCompanyId(companyId: number) {
+      return prisma.paymentMethod.findMany({
+         where: {
+            companyId,
+         }
+      });
+   }
 }
 
 export default new PaymentRepository();

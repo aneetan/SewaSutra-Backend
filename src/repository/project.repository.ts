@@ -42,6 +42,15 @@ class ProjectRepository {
         updatedAt: project.updatedAt,
       }));
    }  
+
+   async getAllProjectsByCompanyId(companyId: number) {
+      return prisma.project.findMany({
+         where: {
+            companyId,
+         }
+      });
+   }
+
 }
 
 export default new ProjectRepository();
