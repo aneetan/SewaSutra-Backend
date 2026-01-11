@@ -23,7 +23,6 @@ class PaymentController {
   getPaymentMethods = [
     authMiddleware,
     verifyAccessToken,
-    requireCompany,
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         if (!req.userId) {
@@ -202,7 +201,6 @@ class PaymentController {
   getPaymentMethodById = [
     authMiddleware,
     verifyAccessToken,
-    requireCompany,
     async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
       try {
         if (!req.userId) {
@@ -242,7 +240,6 @@ class PaymentController {
   getDefaultPaymentMethod = [
     authMiddleware,
     verifyAccessToken,
-    requireCompany,
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         if (!req.userId) {

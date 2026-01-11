@@ -7,7 +7,7 @@ import companyRepository from "../repository/company.repository";
 import { errorResponse } from "../helpers/errorMsg.helper";
 import { parseJSONField } from "../helpers/parseJsonField";
 import { webhookService } from "../services/embedding/webhook.services";
-import { resendOTPSchema } from "../schemas/otp.schema";
+import notificationService from "../services/notification.service";
 
 class CompanyController {
    createCompany = [
@@ -56,6 +56,8 @@ class CompanyController {
                   registrationNo: result.company.registrationNo
                },
             });
+         
+         notificationService.sendNewCompanyPendingVerification(3, result.company.id, result.company.name );
 
          } catch (e) {
             errorResponse(e, res, "Error while creating company profile");

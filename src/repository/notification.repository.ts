@@ -27,7 +27,7 @@ class NotificationRepository {
         data: {
           title: notification.title,
           message: notification.message,
-          type: notification.type,
+          type: notification.type as any,
           userId: notification.userId || null,
           channel: notification.channel || null,
           data: notification.data || {},
@@ -48,7 +48,7 @@ class NotificationRepository {
             data: {
               title: notification.title,
               message: notification.message,
-              type: notification.type,
+              type: notification.type as any,
               userId: notification.userId || null,
               channel: notification.channel || null,
               data: notification.data || {},
@@ -89,9 +89,9 @@ class NotificationRepository {
          const where: any = {};
 
          if (userId !== undefined) where.userId = userId;
-         if (type) where.type = type;
+         if (type) where.type = type as any;
          if (channel) where.channel = channel;
-         if (read !== undefined) where.read = read;
+         if (read !== undefined) where.isRead = read;
          
          if (startDate || endDate) {
          where.createdAt = {};
@@ -173,9 +173,9 @@ class NotificationRepository {
   } = {}): Promise<number> {
       const { userId, type, channel } = filters;
 
-      const where: any = { read: false };
+      const where: any = { isRead: false };
       if (userId !== undefined) where.userId = userId;
-      if (type) where.type = type;
+      if (type) where.type = type as any;
       if (channel) where.channel = channel;
 
       const count = await prisma.notification.count({ where });

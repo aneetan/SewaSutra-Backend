@@ -13,6 +13,7 @@ import contractRouter from './routes/contract.route';
 import paymentRouter from './routes/payment.route';
 import reviewRouter from './routes/review.route';
 import bodyParser from 'body-parser';
+import adminRouter from './routes/admin.route';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/chat', chatRouter);
 app.use('/contract', contractRouter);
 app.use('/payment', paymentRouter);
 app.use('/review', reviewRouter);
+app.use('/admin', adminRouter);
 
 app.get('/', async(req: Request, res: Response) => {
    res.json({ message: 'Hello from ProLink' });

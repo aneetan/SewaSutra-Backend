@@ -10,6 +10,10 @@ class UserRepository {
       return await User.findUnique({where: {email}});
    }
 
+   async findById(id: number): Promise <User | null> {
+      return await User.findUnique({where: {id}});
+   }
+
    // register user to database
    async createUser(userData: Omit<UserAttributes, "id">): Promise<User> {
       const {name, email, phone, address, role, password, status} = userData;

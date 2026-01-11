@@ -106,8 +106,63 @@ class CompanyRepository {
       return user.role === "COMPANY" && user.companies.length > 0;
    }
 
+   async approveCompany(companyId: number) {
+      return await prisma.company.update({
+         where: {
+            id: companyId,
+         },
+         data: {
+            user: {
+            update: {
+               status: "VERIFIED",
+            },
+            },
+         },
+         include: {
+            user: true,
+         },
+      });
+   }
 
+   async declineCompany(companyId: number) {
+      return await prisma.company.update({
+         where: {
+            id: companyId,
+         },
+         data: {
+            user: {
+            update: {
+               status: "DECLINED",
+            },
+            },
+         },
+         include: {
+            user: true,
+         },
+      });
+   }
 
+   async getAllCompanies () {
+      const companies = await prisma.company.findMany({
+         orderBy: {
+            createdAt: "desc",
+         },
+         include: {
+            user: true,
+            docs: true
+         }
+      });
+
+      return companies;
+   }
+
+   async getAllDocsForCompany(companyId: number) {
+      const docs = await prisma.companyDocs.findFirst({
+         where: { companyId },
+      });
+
+      return docs;
+   }
 
 
 }

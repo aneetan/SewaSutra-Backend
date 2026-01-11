@@ -54,6 +54,8 @@ enum NotificationType {
   new_company_pending_verification
   contract_generated
   payment_received
+  approved_company
+  declined_company
 }
 
 enum ChatStatus {

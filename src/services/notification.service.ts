@@ -152,19 +152,37 @@ export class NotificationService {
     });
   }
 
-  async sendContractGenerated(userId: number, contractId: number): Promise<NotificationData> {
+  async sendContractGenerated(userId: number, contractId: number, contractName: string, secondParty: string): Promise<NotificationData> {
     return this.sendToUser(userId, {
       title: 'Contract Generated',
-      message: 'Your contract has been generated successfully.',
+      message: `Your contract has been generated successfully for project ${contractName} with ${secondParty}.`,
       type: 'contract_generated',
       data: { contractId }
     });
   }
 
-  async sendPaymentReceived(userId: number, paymentId: number, amount: number): Promise<NotificationData> {
+  async sendCompanyApproved(companyId: number, companyName: string): Promise<NotificationData> {
+    return this.sendToUser(companyId, {
+      title: 'Approved Company',
+      message: 'Your company has been approved successfully. You can now access the system.',
+      type: 'approved_company',
+      data: { companyId, companyName }
+    });
+  }
+
+  async sendCompanyDeclined (companyId: number, companyName: string): Promise<NotificationData> {
+    return this.sendToUser(companyId, {
+      title: 'Declined Company',
+      message: 'Your company has been declined from accessing system by admin. Please contact admin for more information.',
+      type: 'declined_company',
+      data: { companyId, companyName }
+    });
+  }
+
+  async sendPaymentReceived(userId: number, paymentId: number, amount: number, medium: string): Promise<NotificationData> {
     return this.sendToUser(userId, {
       title: 'Payment Received',
-      message: `Payment of $${amount.toFixed(2)} has been received.`,
+      message: `Payment of $${amount.toFixed(2)} has been received through ${medium}.`,
       type: 'payment_received',
       data: { paymentId, amount }
     });
@@ -228,7 +246,9 @@ export class NotificationService {
       'new_quote_created': 'channel-quotes',
       'new_company_pending_verification': 'channel-admin',
       'contract_generated': 'channel-contracts',
-      'payment_received': 'channel-payments'
+      'payment_received': 'channel-payments',
+      'approved_company': 'channel-companies',
+      'declined_company': 'channel-companies'
     };
 
     return typeChannels[type] || null;

@@ -3,6 +3,9 @@ import contractRepository from "../repository/contract.repository";
 import { generateContractDocument } from "../services/contract.service";
 import { CreateProjectFormData } from "../types/contract.type";
 import { authMiddleware } from "../middleware/authMiddleware";
+import notificationService from "../services/notification.service";
+import userRepository from "../repository/user.repository";
+import companyRepository from "../repository/company.repository";
 
 class ContractRepository {
    createContract = [
@@ -36,8 +39,9 @@ class ContractRepository {
             const contractId = Number(req.params.contractId);
 
             // 1. Activate contract + expire bids
-            await contractRepository.handleContractAcceptance(contractId);
-
+            const contract = await contractRepository.handleContractAcceptance(contractId);
+            const client = await userRepository.findById(contract.clientId);
+            const company = await companyRepository.getCompanyById(contract.companyId);
             // 2. Generate contract document (PDF)
             const pdfPath = await generateContractDocument(contractId);
 
@@ -45,6 +49,8 @@ class ContractRepository {
                message: "Contract accepted and document generated",
                pdfPath,
             });
+            notificationService.sendContractGenerated(contract.clientId, contractId, contract.projectId, company.name);
+            notificationService.sendContractGenerated(contract.companyId, contractId, contract.projectId, client.name);
          } catch (error: any) {
             res.status(500).json({
                message: error.message || "Failed to accept contract",
