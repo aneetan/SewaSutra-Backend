@@ -3,7 +3,9 @@ export type NotificationType =
   | 'new_quote_created'
   | 'new_company_pending_verification'
   | 'contract_generated'
-  | 'payment_received';
+  | 'payment_received'
+  | 'approved_company'
+  | 'declined_company';
 
   export interface NotificationData {
   id?: number;

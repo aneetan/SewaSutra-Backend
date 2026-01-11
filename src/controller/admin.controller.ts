@@ -5,6 +5,8 @@ import companyRepository from "../repository/company.repository";
 import projectRepository from "../repository/project.repository";
 import { errorResponse } from "../helpers/errorMsg.helper";
 import paymentRepository from "../repository/payment.repository";
+import notificationService from "../services/notification.service";
+import emailService from "../services/email.service";
 
 class AdminController {
    approveCompany = [
@@ -22,6 +24,7 @@ class AdminController {
                message: "Company approved and user verified",
                data: company,
             });
+            notificationService.sendCompanyApproved(companyId, company.name);
          } catch (error) {
             next(error);
          }
@@ -43,6 +46,8 @@ class AdminController {
                message: "Company declined",
                data: company,
             });
+            emailService.sendCompanyApprovedEmail(company.user.email, company.name)
+            notificationService.sendCompanyDeclined(companyId, company.name);
          } catch (error) {
             next(error);
          }

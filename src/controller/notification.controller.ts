@@ -260,9 +260,9 @@ class NotificationController{
    */
    deleteNotification = [
       authMiddleware,
-      async(req:Request<{}, {}, NotificationData>, res: Response, next: NextFunction): Promise<void> => {
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
          try {
-            const { id } = req.body;
+            const { id } = req.params;
 
             if (!id) {
                res.status(400).json({ 
@@ -271,7 +271,7 @@ class NotificationController{
                });
             }
 
-            const result = await notificationRepository.deleteNotification(id);
+            const result = await notificationRepository.deleteNotification(Number(id));
 
             res.status(200).json({ 
                success: true, 
