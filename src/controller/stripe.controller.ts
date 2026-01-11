@@ -83,10 +83,11 @@ class StripeController {
         });
 
         await notificationService.sendPaymentReceived(
-            payment.clientId,
-            payment.id,
-            payment.companyAmount
-          );
+          payment.companyId,
+          payment.id,
+          payment.companyAmount,
+          "Stripe"
+        );
       } catch (e: any) {
         console.error("Stripe create payment error:", e);
         res.status(500).json({ message: e.message });
@@ -130,9 +131,10 @@ class StripeController {
 
           
           await notificationService.sendPaymentReceived(
-            payment.clientId,
+            payment.companyId,
             payment.id,
-            payment.companyAmount
+            payment.companyAmount,
+            "Stripe"
           );
         }
 

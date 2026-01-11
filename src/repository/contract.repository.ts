@@ -38,7 +38,7 @@ class ContractRepository {
       return newContract;
   }
 
-   async handleContractAcceptance(contractId: number): Promise<void> {
+   async handleContractAcceptance(contractId: number) {
       const contract = await prisma.contract.findUnique({
         where: { id: contractId },
         include: { requirement: true }
@@ -68,6 +68,7 @@ class ContractRepository {
             },
          });
       })
+      return contract;
 
    }
 

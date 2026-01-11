@@ -121,7 +121,7 @@ class EsewaController {
                companyAmount: payment.companyAmount,
                commission: payment.commission 
             });
-            await notificationService.sendPaymentReceived(payment.clientId, payment.id, payment.companyAmount)
+            await notificationService.sendPaymentReceived(payment.companyId, payment.id, payment.companyAmount, "Esewa")
          } else {
             res.status(400).json({ message: "Payment verification failed" });
          }

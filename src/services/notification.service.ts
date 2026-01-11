@@ -152,10 +152,10 @@ export class NotificationService {
     });
   }
 
-  async sendContractGenerated(userId: number, contractId: number): Promise<NotificationData> {
+  async sendContractGenerated(userId: number, contractId: number, contractName: string, secondParty: string): Promise<NotificationData> {
     return this.sendToUser(userId, {
       title: 'Contract Generated',
-      message: 'Your contract has been generated successfully.',
+      message: `Your contract has been generated successfully for project ${contractName} with ${secondParty}.`,
       type: 'contract_generated',
       data: { contractId }
     });
@@ -179,10 +179,10 @@ export class NotificationService {
     });
   }
 
-  async sendPaymentReceived(userId: number, paymentId: number, amount: number): Promise<NotificationData> {
+  async sendPaymentReceived(userId: number, paymentId: number, amount: number, medium: string): Promise<NotificationData> {
     return this.sendToUser(userId, {
       title: 'Payment Received',
-      message: `Payment of $${amount.toFixed(2)} has been received.`,
+      message: `Payment of $${amount.toFixed(2)} has been received through ${medium}.`,
       type: 'payment_received',
       data: { paymentId, amount }
     });
