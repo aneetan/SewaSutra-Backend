@@ -6,6 +6,7 @@ import { authMiddleware } from "../middleware/authMiddleware";
 import notificationService from "../services/notification.service";
 import userRepository from "../repository/user.repository";
 import companyRepository from "../repository/company.repository";
+import emailService from "../services/email.service";
 
 class ContractRepository {
    createContract = [

@@ -76,29 +76,6 @@ class EmailService {
     await this.sendMail(email, subject, html);
   }
 
-  // 📄 Contract Generated Mail
-  async sendContractGeneratedEmail(
-    email: string,
-    userName: string,
-    projectName: string
-  ): Promise<void> {
-    const subject = "Contract Generated for Your Project";
-
-    const html = `
-    <div style="font-family: Arial; max-width:600px; margin:auto;">
-      <h2 style="color:#007bff;">Contract Generated</h2>
-      <p>Hello ${userName},</p>
-      <p>A contract has been successfully generated for your project:</p>
-      <p><strong>Project:</strong> ${projectName}</p>
-      <p>Please log in to your account to review and sign the contract.</p>
-      <br/>
-      <p>Best regards,<br/>${emailConfig.appName} Team</p>
-    </div>
-    `;
-
-    await this.sendMail(email, subject, html);
-  }
-
   // 🔐 Password Changed Mail
   async sendPasswordChangedEmail(email: string, userName: string): Promise<void> {
     const subject = "Your Password Has Been Changed";

@@ -12,6 +12,7 @@ import { generateJwtToken } from "../utils/jwtToken.util";
 import { verifyAccessToken } from "../middleware/verifyAccessToken";
 import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken"
+import prisma from "../config/dbconfig";
 
 class AuthController {
    register = [
@@ -204,7 +205,59 @@ class AuthController {
 
          res.json({ message: "Logged out" });
       }
-    ]
+   ]
+
+   updateUser = [
+      async(req: Request, res: Response, next: NextFunction) => {
+         try{
+            const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+            const { name, email, phone, address, profile } = req.body;
+
+            const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+               name,
+               email,
+               phone,
+               address,
+               profile, // save cloudinary URL here
+            },
+         });
+
+          res.status(200).json({
+            success: true,
+            data: updatedUser,
+            message: "Profile updated successfully",
+         });
+
+         } catch (e) {
+            errorResponse(e, res, "Cannot edit user");
+            next(e);
+         }
+      } 
+   ]
+
+   getUser = [
+      async(req: Request, res: Response, next: NextFunction) => {
+         try{
+            const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+
+            const user = await  userRepository.findById(userId)
+
+          res.status(200).json({
+            success: true,
+            data: user,
+            message: "Profile retrieved successfully",
+         });
+
+         } catch (e) {
+            errorResponse(e, res, "Cannot get user");
+            next(e);
+         }
+      } 
+   ]
 
 
 }

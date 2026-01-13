@@ -59,6 +59,10 @@ class UserRepository {
 
       else return user;
    }
+
+   async getUserById(id: number): Promise<User | null> {
+      return await User.findUnique({ where: { id } });
+   }
 }
 
 export default new UserRepository();
