@@ -37,7 +37,7 @@ class RequirementController {
 
             res.status(200).json({
                message: "Requirement created",
-               body: newRequirement
+               data: newRequirement
             })
 
          } catch (e) {
@@ -79,8 +79,6 @@ class RequirementController {
 
     // Find matching companies for a requirement
    findMatchingCompanies = [
-      authMiddleware,
-      verifyAccessToken,
       async(req: Request, res: Response, next: NextFunction): Promise<void> => {
          try {
             const { requirementId } = req.params;

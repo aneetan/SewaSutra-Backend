@@ -7,6 +7,7 @@ import notificationService from "../services/notification.service";
 import requirementRepository from "../repository/requirement.repository";
 import companyRepository from "../repository/company.repository";
 import { authMiddleware } from "../middleware/authMiddleware";
+import emailService from "../services/email.service";
 
 
 class BidController {
@@ -375,6 +376,39 @@ class BidController {
             res.status(500).json({ message: "Failed to revoke bid" });
          }
       }
+   ]
+
+   checkBidExists = [
+   async (req: Request, res: Response) => {
+      try {
+         const { clientId, companyId, requirementId } = req.query;
+
+         if (!clientId || !companyId || !requirementId) {
+            return res.status(400).json({
+            success: false,
+            message: "clientId, companyId and requirementId are required",
+            });
+         }
+
+         const bid = await bidRepository.findExistingBid(
+            Number(clientId),
+            Number(companyId),
+            Number(requirementId)
+         );
+
+         return res.status(200).json({
+            success: true,
+            exists: !!bid,
+            data: bid || null,
+         });
+      } catch (error) {
+         console.error("Check bid exists error:", error);
+         res.status(500).json({
+            success: false,
+            message: "Server error while checking bid",
+         });
+      }
+   }
    ]
 
 }

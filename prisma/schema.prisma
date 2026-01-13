@@ -45,6 +45,7 @@ enum BidStatus {
   DECLINED
   ACCEPTED
   INITIATED
+  FINAL_SUBMITTED
   PENDING
 }
 
@@ -106,6 +107,7 @@ model User {
   password       String 
   status         Status   @default(PENDING)
   emailVerified  Boolean  @default(false)
+  profile        String?  
 
   companies      Company[]
   requirements   Requirement[]
