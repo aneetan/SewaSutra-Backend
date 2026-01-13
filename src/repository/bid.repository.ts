@@ -1,3 +1,4 @@
+import { BidStatus } from "@prisma/client";
 import prisma from "../config/dbconfig";
 import { BidData, BidRequestData } from "../types/bid.type";
 
@@ -65,6 +66,9 @@ class BidRepository {
                requirement: true,
                company: true,
                user: true
+            },
+            orderBy: {
+               requestedAt: "desc", 
             },
             skip,
             take: limit,
@@ -247,6 +251,22 @@ class BidRepository {
         userId,
         companyId,
         requirementId,
+      },
+    });
+  }
+
+  async updateBidStatusByRequirement(
+    companyId: number,
+    requirementId: number,
+    status: BidStatus
+  ) {
+    return prisma.bid.updateMany({
+      where: {
+        companyId,
+        requirementId,
+      },
+      data: {
+        status,
       },
     });
   }

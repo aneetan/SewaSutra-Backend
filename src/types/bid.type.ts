@@ -1,4 +1,4 @@
-type BidStatus = 'DECLINED' | 'ACCEPTED' | 'INITIATED' | 'PENDING'
+type BidStatus = 'DECLINED' | 'ACCEPTED' | 'INITIATED' | 'PENDING' | 'FINAL_SUBMITTED'
 
 export interface BidRequestData {
    id: number;

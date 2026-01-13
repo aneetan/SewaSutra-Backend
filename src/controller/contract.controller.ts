@@ -7,6 +7,7 @@ import notificationService from "../services/notification.service";
 import userRepository from "../repository/user.repository";
 import companyRepository from "../repository/company.repository";
 import emailService from "../services/email.service";
+import bidRepository from "../repository/bid.repository";
 
 class ContractRepository {
    createContract = [
@@ -21,6 +22,13 @@ class ContractRepository {
             }
 
             const contract = await contractRepository.createContractTable(data);
+
+             // 2. Update bid status to INITIATED
+            await bidRepository.updateBidStatusByRequirement(
+               data.companyId,
+               data.requirementId,
+               "FINAL_SUBMITTED"
+            );
 
             res.status(201).json({
                message: "Contract created successfully",
@@ -41,6 +49,12 @@ class ContractRepository {
 
             // 1. Activate contract + expire bids
             const contract = await contractRepository.handleContractAcceptance(contractId);
+             // 2. Update bid status to INITIATED
+               await bidRepository.updateBidStatusByRequirement(
+                  contract.companyId,
+                  contract.requirementId,
+                  "INITIATED"
+               );
             const client = await userRepository.findById(contract.clientId);
             const company = await companyRepository.getCompanyById(contract.companyId);
             // 2. Generate contract document (PDF)
