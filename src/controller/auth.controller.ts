@@ -172,7 +172,7 @@ class AuthController {
                });
             }
 
-            const accessToken = generateJwtToken({user}, '1h');
+            const accessToken = generateJwtToken({user}, '12h');
             await redis.set(`accessToken:${user.id}`, accessToken, "EX", 60 * 60);
 
             res.status(200).json({

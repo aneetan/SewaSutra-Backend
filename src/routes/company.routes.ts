@@ -13,10 +13,15 @@ companyRouter.use(authMiddleware);
 
 companyRouter.post('/create', companyController.createCompany);
 companyRouter.get('/:companyId/profile', companyController.getCompanyProfile)
+companyRouter.patch(
+  "/:companyId/full-profile",
+  companyController.updateCompanyFullProfile
+);
+
 
 //Projects
 companyRouter.post('/add-project', projectController.createProject)
-companyRouter.get('/projects', projectController.getProjects)
+companyRouter.get('/:companyId/projects', projectController.getProjects)
 
 //payment
 companyRouter.post('/add-payment', paymentController.createPaymentMethod)

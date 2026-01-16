@@ -163,7 +163,7 @@ model CompanyDocs{
   businessLicense   String
   taxCertificate    String
   ownerId           String?
-  companyId         Int
+  companyId         Int     @unique
   company           Company @relation(fields: [companyId], references: [id])
 }
 

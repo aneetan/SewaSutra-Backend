@@ -63,6 +63,24 @@ class UserRepository {
    async getUserById(id: number): Promise<User | null> {
       return await User.findUnique({ where: { id } });
    }
+
+   async getUserByCompanyId(companyId: number) {
+   const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: {
+         user: true, // fetch the related user
+      },
+   });
+
+   if (!company) {
+      throw new Error("Company not found");
+   }
+
+   return company.user;
+   }
+
+
+    
 }
 
 export default new UserRepository();

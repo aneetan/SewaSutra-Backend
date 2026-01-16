@@ -8,6 +8,8 @@ import { errorResponse } from "../helpers/errorMsg.helper";
 import { parseJSONField } from "../helpers/parseJsonField";
 import { webhookService } from "../services/embedding/webhook.services";
 import notificationService from "../services/notification.service";
+import cloudinary from "../config/cloudinary.config";
+import userRepository from "../repository/user.repository";
 
 class CompanyController {
    createCompany = [
@@ -76,24 +78,30 @@ class CompanyController {
             res.status(404).json({ message: "Company not found" });
          }
 
-         const response = {
-               companyInfo: {
-                  name: company.name,
-                  registrationNo: company.registrationNo,
-                  description: company.description,
-                  establishedYear: company.establishedYear,
-                  serviceCategory: company.serviceCategory,
-                  websiteUrl: company.websiteUrl,
-               },
-               servicePricing: {
-                  servicesOffered: company.services.map((s: any) => s.service),
-                  priceRangeMin: company.priceRangeMin,
-                  priceRangeMax: company.priceRangeMax,
-                  avgDeliveryTime: company.avgDeliveryTime,
-               },
-               logo: company.docs?.[0]?.logo,
-               status: company.user.status
-            };
+       const response = {
+         companyInfo: {
+            name: company.name,
+            registrationNo: company.registrationNo,
+            description: company.description,
+            establishedYear: company.establishedYear,
+            serviceCategory: company.serviceCategory,
+            websiteUrl: company.websiteUrl,
+         },
+         servicePricing: {
+            servicesOffered: company.services.map((s: any) => s.service),
+            priceRangeMin: company.priceRangeMin,
+            priceRangeMax: company.priceRangeMax,
+            avgDeliveryTime: company.avgDeliveryTime,
+         },
+         docs: {
+            logo: company.docs?.[0]?.logo || "",
+            taxCertificate: company.docs?.[0]?.taxCertificate || "",
+            businessLicense: company.docs?.[0]?.businessLicense || "",
+            ownerId: company.docs?.[0]?.ownerId || ""
+         },
+         status: company.user.status
+         };
+
          res.status(201).json(response);
       }
    ]
@@ -107,6 +115,43 @@ class CompanyController {
          res.status(201).json({ isCompany });
       }
    ]
+
+   updateCompanyFullProfile = [
+      async (req: Request, res: Response) => {
+         try {
+            const companyId = Number(req.params.companyId);
+            
+            // Parse JSON fields if they're sent as strings
+            const companyInfo = parseJSONField(req.body.companyInfo);
+            const servicePricing = parseJSONField(req.body.servicePricing);
+            const docs = parseJSONField(req.body.docs);
+
+            // Validate required data
+            if (!companyId || (!companyInfo && !servicePricing && !docs)) {
+               return res.status(400).json({
+                  success: false,
+                  message: "Missing required fields. Provide at least companyInfo, servicePricing, or docs.",
+               });
+            }
+
+            const updatedCompany = await companyRepository.updateCompanyFullProfile(companyId, {
+               companyInfo,
+               servicePricing,
+               docs, 
+            });
+            await companyRepository.updateUserStatusPending(updatedCompany.userId);
+
+            res.status(200).json({
+               success: true,
+               message: "Company profile updated successfully",
+               data: updatedCompany,
+            });
+         } catch (err) {
+            console.error("Update company profile error:", err);
+            errorResponse(err, res, "Error updating company profile");
+         }
+      }
+   ];
 
 
 
