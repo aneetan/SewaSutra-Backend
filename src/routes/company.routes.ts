@@ -43,4 +43,6 @@ companyRouter.get('/haskyc', companyController.hasCompanyData)
 companyRouter.get('/contracts/pending', contractController.getCompanyPendingContracts)
 companyRouter.get('/contract/projects', contractController.getCompanyProjects)
 
+companyRouter.get("/kyc-status", companyController.getKycStatus);
+
 export default companyRouter;

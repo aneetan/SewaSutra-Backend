@@ -154,6 +154,38 @@ class CompanyController {
    ];
 
 
+   getKycStatus =[
+      async (req: Request, res: Response) => {
+          try {
+            const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+            const user = await userRepository.getUserById(userId);
+            const company = await companyRepository.getCompanyByUser(userId);
+
+            const kycStatus = user.status; 
+
+            const canAccessSystem = kycStatus === "VERIFIED";
+
+            let message = "";
+            if (kycStatus === "PENDING") {
+            message = "Your KYC is not filled yet! Please complete profile setup.";
+            } else if (kycStatus === "DECLINED") {
+            message = "Your KYC has been declined. Please resubmit your profile.";
+            }
+
+            res.status(200).json({
+            status: kycStatus,
+            canAccessSystem,
+            message,
+            companyId: company.id
+            });
+         } catch (e) {
+            errorResponse(e, res, "Error fetching KYC status");
+         }
+      }
+   ]
+
+
 
 }
 
