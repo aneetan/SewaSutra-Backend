@@ -38,7 +38,7 @@ class ReviewRepository {
       return prisma.review.findMany({
          where: { companyId, deletedAt: false },
          include: {
-            client: { select: { id: true, name: true } },
+            client: { select: { id: true, name: true, profile: true } },
          },
          orderBy: { createdAt: "desc" },
       });
