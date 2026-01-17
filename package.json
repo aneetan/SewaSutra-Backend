@@ -40,6 +40,8 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
     "otp-generator": "^4.0.1",
+    "passport": "^0.7.0",
+    "passport-google-token": "^0.1.2",
     "puppeteer": "^24.33.1",
     "pusher": "^5.2.0",
     "streamifier": "^0.1.1",
