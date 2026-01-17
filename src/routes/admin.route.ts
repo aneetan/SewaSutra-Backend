@@ -15,7 +15,9 @@ adminRouter.get("/companies/:companyId/docs", adminController.getDocsByCompanyId
 adminRouter.get("/payments", esewaController.getAllPayments);
 adminRouter.get("/clients", adminController.getAllClients);
 adminRouter.get("/projects", adminController.getAllAcceptedContracts);
-
-
+adminRouter.get("/project-stats", adminController.getProjectStats);
+adminRouter.get("/payment-stats", adminController.getPaymentStatus);
+adminRouter.get("/quotation-stats", adminController.getQuotationStats);
+adminRouter.get("/company-stats", adminController.getRegisteredCompanies);
 
 export default adminRouter;

@@ -1,6 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import prisma from "../config/dbconfig";
-import companyController from "./company.controller";
 import companyRepository from "../repository/company.repository";
 import projectRepository from "../repository/project.repository";
 import { errorResponse } from "../helpers/errorMsg.helper";
@@ -9,6 +7,7 @@ import notificationService from "../services/notification.service";
 import emailService from "../services/email.service";
 import userRepository from "../repository/user.repository";
 import contractRepository from "../repository/contract.repository";
+import dashboardRepository from "../repository/dashboard.repository";
 
 class AdminController {
    approveCompany = [
@@ -183,6 +182,70 @@ class AdminController {
             success: false,
             message: "Failed to fetch accepted contracts",
             });
+         }
+      }
+   ]
+
+
+   getProjectStats =[
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const stats = await dashboardRepository.getProjectStats();
+
+            res.status(200).json({
+               success: true,
+               message: "Project statistics fetched successfully",
+               data: stats,
+            });
+         } catch (error) {
+            console.error("Dashboard stats error:", error);
+            res.status(500).json({
+               success: false,
+               message: "Failed to fetch project statistics",
+            });
+         }
+      }
+   ]
+
+   getPaymentStatus = [
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+      const stats = await dashboardRepository.getPaymentStats();
+      res.status(200).json({
+        success: true,
+        message: "Payment stats retrieved successfully",
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Dashboard stats error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch payment stats",
+      });
+    }
+      }
+   ]
+
+   getQuotationStats =[
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const stats = await dashboardRepository.getQuotationStats();
+            res.status(200).json({ success: true, data: stats });
+         } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, message: "Failed to get quotation stats" });
+         }
+      }
+   ]
+
+   getRegisteredCompanies =[
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const stats = await dashboardRepository.getAllCompanies();
+            res.status(200).json({ success: true, data: stats });
+         } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, message: "Failed to get quotation stats" });
          }
       }
    ]

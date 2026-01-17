@@ -183,11 +183,13 @@ class ContractRepository {
 
       // Decide new status
       let newStatus: "PARTIALLY_PAID" | "FULLY_PAID";
+      let newContractStatus = contract.status;
 
       if (contract.paymentStatus === "PENDING") {
          newStatus = "PARTIALLY_PAID";
       } else if(contract.paymentStatus === "PARTIALLY_PAID") {
          newStatus = "FULLY_PAID";
+         newContractStatus = "COMPLETED";
       }
 
       // Update contract status
@@ -195,9 +197,11 @@ class ContractRepository {
          where: { id: contractId },
          data: {
             paymentStatus: newStatus,
+            status: newContractStatus,
             updatedAt: new Date(),
          },
       });
+
 
       return updatedContract;
    }
