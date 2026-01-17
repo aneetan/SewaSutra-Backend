@@ -65,18 +65,37 @@ class UserRepository {
    }
 
    async getUserByCompanyId(companyId: number) {
-   const company = await prisma.company.findUnique({
-      where: { id: companyId },
-      select: {
-         user: true, // fetch the related user
-      },
-   });
+      const company = await prisma.company.findUnique({
+         where: { id: companyId },
+         select: {
+            user: true, // fetch the related user
+         },
+      });
 
-   if (!company) {
-      throw new Error("Company not found");
+      if (!company) {
+         throw new Error("Company not found");
+      }
+
+      return company.user;
    }
 
-   return company.user;
+   async getAllClients() {
+      return await prisma.user.findMany({
+         where: {
+         role: "CLIENT",
+         },
+         select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            address: true,
+            profile: true
+         },
+         orderBy: {
+         id: "desc",
+         },
+      });
    }
 
 
