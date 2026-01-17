@@ -23,10 +23,10 @@ class ProjectRepository {
       });
    }
 
-   async getAllProjects(userId?: number): Promise<Project[]> {
-      const company = await companyRepository.getCompanyByUser(userId);
+   async getAllProjects(companyId?: number): Promise<Project[]> {
+      // const company = await companyRepository.getCompanyByUser(companyId);
       const projects = await prisma.project.findMany({
-        where: { companyId: company.id },
+        where: { companyId: companyId },
         orderBy: { completionDate: "desc" },
       });
 

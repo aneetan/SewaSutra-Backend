@@ -73,7 +73,7 @@ class BidRepository {
             skip,
             take: limit,
             }),
-            prisma.bidRequest.count({ where }), // Just pass where, no select!
+            prisma.bidRequest.count({ where }), 
          ]);
 
          return {

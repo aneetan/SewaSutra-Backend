@@ -3,6 +3,7 @@ import { validateSchema } from "../middleware/validateSchema";
 import { LoginUserInput, loginUserSchema, RegisterUserInput, registerUserSchema } from "../schemas/user.schema";
 import userRepository from "../repository/user.repository";
 import bcrypt from 'bcryptjs';
+import axios from "axios";
 import { OTPService } from "../services/otp.service";
 import emailService from "../services/email.service";
 import { errorResponse } from "../helpers/errorMsg.helper";
@@ -147,7 +148,8 @@ class AuthController {
 
 
          } catch(e) {
-
+               errorResponse(e, res, "Error while resending OTP");
+               next(e);
          }
       }
    ]
@@ -172,7 +174,7 @@ class AuthController {
                });
             }
 
-            const accessToken = generateJwtToken({user}, '1h');
+            const accessToken = generateJwtToken({user}, '12h');
             await redis.set(`accessToken:${user.id}`, accessToken, "EX", 60 * 60);
 
             res.status(200).json({
@@ -187,6 +189,82 @@ class AuthController {
          }
       } 
    ]
+
+   googleOAuth = [
+      async (req: Request, res: Response, next: NextFunction) => {
+         try {
+            const { idToken } = req.body as { idToken?: string };
+            if (!idToken) return res.status(400).json({ message: 'idToken is required' });
+
+            // Verify token with Google's tokeninfo endpoint
+            const tokenInfoUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
+            const resp = await axios.get(tokenInfoUrl);
+            const payload: any = resp.data;
+
+            // Ensure token audience matches our CLIENT_ID
+            const clientId = process.env.GOOGLE_CLIENT_ID;
+            if (!clientId) return res.status(500).json({ message: 'Google client id not configured' });
+            if (payload.aud !== clientId) return res.status(401).json({ message: 'Invalid token audience' });
+
+            // Ensure email is verified by Google
+            if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+            return res.status(403).json({ message: 'Email not verified by Google' });
+            }
+
+            const email: string = payload.email;
+            const name: string = payload.name || '';
+            const picture: string | undefined = payload.picture;
+
+            let user = await userRepository.findByEmail(email);
+            if(user.role === "COMPANY") {
+               res.status(400).json({
+                  status: 400,
+                  message: "Email already signup as Company. Login instead"
+               })
+            }
+            let isNewUser = false;
+
+            // If user doesn't exist, create new user (SIGN UP)
+            if (!user) {
+            const randomPassword = Math.random().toString(36).slice(-12);
+            const hashedPassword = await bcrypt.hash(randomPassword, 12);
+            const phone = '';
+            const address = '';
+
+            user = await userRepository.createUser({
+               name: name || email.split('@')[0],
+               email,
+               phone,
+               address,
+               role: 'CLIENT',
+               password: hashedPassword,
+               status: 'VERIFIED'
+            });
+
+            // Mark email as verified (Google verified it)
+            await userRepository.updateVerificationStatus(email);
+            isNewUser = true;
+            }
+
+            // Build JWT and return (works for both new and existing users)
+            const accessToken = generateJwtToken({ user }, '12h');
+            await redis.set(`accessToken:${user.id}`, accessToken, "EX", 60 * 60);
+
+            res.status(200).json({
+            message: isNewUser 
+               ? 'Registration via Google successful' 
+               : 'Login via Google successful',
+            accessToken,
+            id: user.id,
+            isNewUser
+            });
+
+         } catch (e) {
+            errorResponse(e, res, 'Google OAuth failed');
+            next(e);
+         }
+      }
+      ]
 
    logout = [
       verifyAccessToken,

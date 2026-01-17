@@ -81,6 +81,111 @@ class EsewaRepository {
       },
     });
   }
+
+  async getAllPayments() {
+    return await prisma.appPayment.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        amount: true,
+        commission: true,
+        gateway: true,          
+        status: true,
+        createdAt: true,
+
+        company: {
+          select: {
+            id: true,
+            name: true,
+            docs: {
+              select: {
+                logo: true,
+              },
+            },
+          },
+        },
+
+        client: {
+          select: {
+            name: true,
+          },
+        },
+
+        contract: {
+          select: {
+            projectId: true,
+            requirement: {
+              select: {
+                title: true,  
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getPaymentsByCompany(companyId: number) {
+    return await prisma.appPayment.findMany({
+      where: { companyId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            docs: { select: { logo: true } },
+          },
+        },
+        client: {
+          select: { name: true, profile: true },
+        },
+        contract: {
+          select: {
+            requirement: {
+              select: {
+                title: true, // project name
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+
+  async getPaymentsForClient(clientId: number) {
+    return await prisma.appPayment.findMany({
+      where: { clientId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            docs: { select: { logo: true } },
+          },
+        },
+        client: {
+          select: { name: true },
+        },
+        contract: {
+          select: {
+            requirement: {
+              select: {
+                title: true, // project name
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+
+
 }
 
 export const esewaRepository = new EsewaRepository();

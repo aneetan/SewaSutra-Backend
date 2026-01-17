@@ -1,6 +1,28 @@
 import { Company } from "@prisma/client";
 import { CreateCompanyData } from "../types/company/company.types";
 import prisma from "../config/dbconfig";
+interface UpdateCompanyFullProfileDTO {
+  companyInfo?: {
+    name?: string;
+    registrationNo?: string;
+    description?: string;
+    establishedYear?: string;
+    serviceCategory?: string;
+    websiteUrl?: string;
+  };
+  servicePricing?: {
+    priceRangeMin?: number;
+    priceRangeMax?: number;
+    avgDeliveryTime?: string;
+    servicesOffered?: string[];
+  };
+  docs?: {
+    logo?: string;
+    taxCertificate?: string;
+    businessLicense?: string;
+    ownerId?: string;
+  };
+}
 
 class CompanyRepository {
    async registerCompany(data: CreateCompanyData) {
@@ -78,6 +100,9 @@ class CompanyRepository {
             docs: {
                select: {
                   logo: true,
+                  taxCertificate: true,
+                  businessLicense: true,
+                  ownerId: true,
                },
             },
             user: {
@@ -163,6 +188,69 @@ class CompanyRepository {
 
       return docs;
    }
+
+   async updateUserStatusPending(userId: number) {
+      return prisma.user.update({
+         where: { id: userId },
+         data: { status: "PENDING" },
+      });
+   }
+
+   async updateCompanyFullProfile(companyId: number, data: UpdateCompanyFullProfileDTO) {
+      try {
+         // 1️⃣ Update main company table
+         const companyUpdateData: any = {};
+         if (data.companyInfo) Object.assign(companyUpdateData, data.companyInfo);
+         if (data.servicePricing) {
+            const { priceRangeMin, priceRangeMax, avgDeliveryTime } = data.servicePricing;
+            if (priceRangeMin !== undefined) companyUpdateData.priceRangeMin = Number(priceRangeMin);
+            if (priceRangeMax !== undefined) companyUpdateData.priceRangeMax = Number(priceRangeMax);
+            if (avgDeliveryTime !== undefined) companyUpdateData.avgDeliveryTime = avgDeliveryTime;
+         }
+
+         const updatedCompany = await prisma.company.update({
+            where: { id: companyId },
+            data: companyUpdateData,
+         });
+
+         // 2️⃣ Update services (delete old, insert new)
+         if (data.servicePricing?.servicesOffered) {
+            await prisma.services.deleteMany({ where: { companyId } });
+
+            if (data.servicePricing.servicesOffered.length > 0) {
+               await prisma.services.createMany({
+                  data: data.servicePricing.servicesOffered.map((service) => ({
+                     companyId,
+                     service: String(service).trim(),
+                  })),
+               });
+            }
+         }
+
+         // 3️⃣ Upsert company documents
+         if (data.docs) {
+            const docsData: any = {};
+            if (data.docs.logo !== undefined) docsData.logo = data.docs.logo;
+            if (data.docs.businessLicense !== undefined) docsData.businessLicense = data.docs.businessLicense;
+            if (data.docs.taxCertificate !== undefined) docsData.taxCertificate = data.docs.taxCertificate;
+            if (data.docs.ownerId !== undefined) docsData.ownerId = data.docs.ownerId;
+
+            await prisma.companyDocs.upsert({
+               where: { companyId },
+               update: docsData,
+               create: { ...docsData, companyId },
+            });
+         }
+
+         return updatedCompany;
+      } catch (e) {
+         console.error('Update company profile error:', e);
+         throw e;
+      }
+   }
+
+
+
 
 
 }

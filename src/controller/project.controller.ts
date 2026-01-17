@@ -42,14 +42,14 @@ class ProjectController {
    getProjects = [
       authMiddleware,
       verifyAccessToken,
-      requireCompany,
       async (req: Request, res: Response, next: NextFunction): Promise<void> => {
          try {
             const request = req as Request & { userId: string };
             const userId = Number(request.userId);
+            const companyId = Number(req.params.companyId);
 
             // Get the company of the user first
-            const companyProjects = await projectRepository.getAllProjects(userId);
+            const companyProjects = await projectRepository.getAllProjects(companyId);
 
             res.status(200).json({
             message: "Projects fetched successfully",
