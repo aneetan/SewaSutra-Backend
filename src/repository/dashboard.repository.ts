@@ -118,9 +118,70 @@ class DashboardRepository {
   async getAllCompanies() {
     // Total quotations
     const registeredCompanies = await prisma.company.count();
-    
+
     return {
       registeredCompanies
+    };
+  }
+
+  async getClientStats(clientId: number) {
+    const [
+      totalProjects,
+      completedProjects,
+      pendingSignatureProject,
+      inProgressProjects,
+      pendingQuoteRequest,
+      cancelledProject
+    ] = await Promise.all([
+      prisma.contract.count({
+        where: { clientId },
+      }),
+
+      prisma.contract.count({
+        where: {
+          clientId,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.contract.count({
+        where: {
+          clientId,
+          status: "PENDING_SIGNATURE",
+        },
+      }),
+
+      prisma.contract.count({
+        where: {
+          clientId,
+          status: "ACTIVE",
+        },
+      }),
+
+      prisma.bidRequest.count({
+         where: {
+            status: "SENT",
+            requirement: {
+               userId: clientId
+            }
+         }
+      }),
+
+      prisma.contract.count({
+        where: {
+          clientId,
+          status: "CANCELLED",
+        },
+      }),
+    ]);
+
+    return {
+      totalProjects,
+      completedProjects,
+      pendingSignatureProject,
+      inProgressProjects,
+      pendingQuoteRequest,
+      cancelledProject
     };
   }
 

@@ -8,6 +8,7 @@ import { webhookService } from "../services/embedding/webhook.services";
 import { authMiddleware } from "../middleware/authMiddleware";
 import { success } from "zod";
 import { esewaRepository } from "../repository/esewa.repository";
+import dashboardRepository from "../repository/dashboard.repository";
 
 class RequirementController {
    createRequirement = [
@@ -155,6 +156,32 @@ class RequirementController {
             }
          }
    
+      ]
+
+      getClientDashboardStats  = [
+         async (req: Request, res: Response) => {
+            try {
+               const request = req as Request & { userId: string };
+               const clientId = Number(request.userId);
+
+               if (!clientId) {
+                  return res.status(400).json({ message: "Client ID is required" });
+               }
+
+               const stats = await dashboardRepository.getClientStats(clientId);
+
+               res.status(200).json({
+                  success: true,
+                  data: stats,
+               });
+            } catch (error) {
+               console.error("Client dashboard stats error:", error);
+               res.status(500).json({
+                  success: false,
+                  message: "Failed to load client dashboard statistics",
+               });
+            }
+         }
       ]
 
 
