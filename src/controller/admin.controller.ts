@@ -8,6 +8,7 @@ import paymentRepository from "../repository/payment.repository";
 import notificationService from "../services/notification.service";
 import emailService from "../services/email.service";
 import userRepository from "../repository/user.repository";
+import contractRepository from "../repository/contract.repository";
 
 class AdminController {
    approveCompany = [
@@ -145,9 +146,10 @@ class AdminController {
       },
    ];
 
-   getAllClients =[
+   getAllClients = [
       async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-         try {
+
+      try {
          const clients = await userRepository.getAllClients();
 
          res.status(200).json({
@@ -165,6 +167,25 @@ class AdminController {
       }
    ]
 
+   getAllAcceptedContracts =[
+      async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+         try {
+            const contracts = await contractRepository.getAllAcceptedContracts();
+
+            res.status(200).json({
+               success: true,
+               message: "Accepted contracts retrieved successfully",
+               data: contracts,
+            });
+         } catch (error) {
+            console.error("Error fetching accepted contracts:", error);
+            res.status(500).json({
+            success: false,
+            message: "Failed to fetch accepted contracts",
+            });
+         }
+      }
+   ]
 }
 
 export default new AdminController;
