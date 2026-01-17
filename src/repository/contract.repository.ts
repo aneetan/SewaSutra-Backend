@@ -248,6 +248,45 @@ class ContractRepository {
     });
   }
 
+  async getAllProjects() {
+    return await prisma.contract.findMany({
+      include: {
+        requirement: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            user: true
+          },
+        },
+        client: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        payment: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
 
 
 

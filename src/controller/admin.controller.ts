@@ -169,7 +169,7 @@ class AdminController {
    getAllAcceptedContracts =[
       async (req: Request, res: Response, next: NextFunction): Promise<void> => {
          try {
-            const contracts = await contractRepository.getAllAcceptedContracts();
+            const contracts = await contractRepository.getAllProjects();
 
             res.status(200).json({
                success: true,
