@@ -44,5 +44,7 @@ companyRouter.get('/contracts/pending', contractController.getCompanyPendingCont
 companyRouter.get('/contract/projects', contractController.getCompanyProjects)
 
 companyRouter.get("/kyc-status", companyController.getKycStatus);
+companyRouter.get("/getPayments", companyController.getCompanyPayments);
+
 
 export default companyRouter;

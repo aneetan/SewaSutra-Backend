@@ -10,6 +10,7 @@ import { webhookService } from "../services/embedding/webhook.services";
 import notificationService from "../services/notification.service";
 import cloudinary from "../config/cloudinary.config";
 import userRepository from "../repository/user.repository";
+import { esewaRepository } from "../repository/esewa.repository";
 
 class CompanyController {
    createCompany = [
@@ -181,6 +182,53 @@ class CompanyController {
             });
          } catch (e) {
             errorResponse(e, res, "Error fetching KYC status");
+         }
+      }
+   ]
+
+   getCompanyPayments = [
+      async (req: Request, res: Response) => {
+          try {
+             const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+
+            const company = companyRepository.getCompanyByUser(userId);
+
+            const payments = await esewaRepository.getPaymentsByCompany((await company).id);
+
+            const formatted = payments.map((p) => ({
+            id: p.id,
+            amount: p.amount,
+            commission: p.commission,
+            mode: p.gateway,
+            status: p.status,
+
+            company: {
+               id: p.company.id,
+               name: p.company.name,
+               logo: p.company.docs[0]?.logo || null,
+            },
+
+            client: {
+               name: p.client.name,
+               profile: p.client.profile
+            },
+
+            project: {
+               title: p.contract.requirement.title,
+            },
+            }));
+
+            res.status(200).json({
+            success: true,
+            data: formatted,
+            });
+         } catch (error) {
+            console.error(error);
+            res.status(500).json({
+            success: false,
+            message: "Failed to fetch company payments",
+            });
          }
       }
    ]

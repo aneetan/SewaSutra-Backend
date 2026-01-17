@@ -3,6 +3,7 @@ import bidController from "../controller/bid.controller";
 import requirementController from "../controller/requirement.controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 import authController from "../controller/auth.controller";
+import companyController from "../controller/company.controller";
 
 const clientRouter = Router();
 
@@ -24,5 +25,7 @@ clientRouter.put('/decline-quote/:quoteId', bidController.declineQuoteByClient)
 
 clientRouter.patch('/profile/edit', authController.updateUser )
 clientRouter.get('/profile', authController.getUser )
+
+clientRouter.get("/getPayments", requirementController.getClientPayments);
 
 export default clientRouter;

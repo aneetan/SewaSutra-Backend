@@ -131,6 +131,47 @@ class EsewaController {
       }
    },
    ];
+
+   getAllPayments =[
+      async (req: Request, res: Response, next: NextFunction) => {
+         try {
+            const payments = await esewaRepository.getAllPayments();
+
+            const formatted = payments.map((p) => ({
+            id: p.id,
+            amount: p.amount,
+            commission: p.commission,
+            mode: p.gateway,
+            status: p.status,
+
+            company: {
+               id: p.company.id,
+               name: p.company.name,
+               logo: p.company.docs[0]?.logo || null,
+            },
+
+            client: {
+               name: p.client.name,
+            },
+
+            project: {
+               title: p.contract.requirement.title,
+            },
+            }));
+
+            res.status(200).json({
+            success: true,
+            data: formatted,
+            });
+         } catch (error) {
+            console.error(error);
+            res.status(500).json({
+            success: false,
+            message: "Failed to fetch payments",
+            });
+         }
+      }
+   ]
 }
 
 export default new EsewaController();
