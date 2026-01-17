@@ -186,6 +186,119 @@ class DashboardRepository {
   }
 
 
+  async getCompanyDashboardStats(companyId: number) {
+    const [
+      submittedQuotes,
+      acceptedQuotes,
+      pendingSignature,
+      activeProjects,
+      totalRevenueAggregate,
+      totalBids,
+      reviewsAggregate,
+      reviewCount,
+    ] = await Promise.all([
+      // Submitted quotes
+      prisma.bid.count({
+        where: { companyId },
+      }),
+
+      // Accepted quotes
+      prisma.bid.count({
+        where: {
+          companyId,
+          status: {
+            in: ["ACCEPTED", "FINAL_SUBMITTED", "INITIATED"],
+         }
+
+        },
+      }),
+
+      // Pending signature contracts
+      prisma.contract.count({
+        where: {
+          companyId,
+          status: "PENDING_SIGNATURE",
+        },
+      }),
+
+      // Active projects
+      prisma.contract.count({
+        where: {
+          companyId,
+          status: "ACTIVE",
+        },
+      }),
+
+      // Total Revenue (only successful payments)
+      prisma.appPayment.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          companyId,
+          status: "SUCCESS",
+        },
+      }),
+
+      // Total bids (for acceptance rate)
+      prisma.bid.count({
+        where: { companyId },
+      }),
+
+      // Average rating
+      prisma.review.aggregate({
+        _avg: {
+          rating: true,
+        },
+        where: {
+          companyId,
+        },
+      }),
+
+      prisma.bid.count({
+        where: { companyId },
+      }),
+    ]);
+
+    // New Requests = requirements where company has NOT yet bid
+    const newRequests = await prisma.bidRequest.count({
+      where: {
+         companyId,
+         status: {
+            notIn: ["SENT", "DECLINED"],
+         },
+      },
+   });
+
+
+    const totalRevenue = totalRevenueAggregate._sum.amount || 0;
+    const averageRating = reviewsAggregate._avg.rating || 0;
+
+    const acceptanceRate =
+      totalBids > 0 ? ((acceptedQuotes / totalBids) * 100).toFixed(1) : "0";
+   
+      prisma.review.count({
+         where: { companyId },
+      })
+
+    return {
+      quotes: {
+        newRequests,
+        submittedQuotes,
+        pendingSignature,
+        acceptedQuotes,
+      },
+      stats: {
+        totalRevenue,
+        acceptanceRate: Number(acceptanceRate),
+        activeProjects,
+        averageRating: Number(averageRating.toFixed(1)),
+        reviewCount
+      },
+    };
+  }
+
+
 }
 
 export default new DashboardRepository();

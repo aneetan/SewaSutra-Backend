@@ -11,6 +11,7 @@ import notificationService from "../services/notification.service";
 import cloudinary from "../config/cloudinary.config";
 import userRepository from "../repository/user.repository";
 import { esewaRepository } from "../repository/esewa.repository";
+import dashboardRepository from "../repository/dashboard.repository";
 
 class CompanyController {
    createCompany = [
@@ -228,6 +229,33 @@ class CompanyController {
             res.status(500).json({
             success: false,
             message: "Failed to fetch company payments",
+            });
+         }
+      }
+   ]
+
+   getCompanyDashboardStats  = [
+      async (req: Request, res: Response) => {
+         try {
+            const request = req as Request & { userId: string };
+            const userId = Number(request.userId);
+            const company = await companyRepository.getCompanyByUser(userId);
+
+            if (!company.id) {
+               return res.status(400).json({ message: "Company ID is required" });
+            }
+
+            const data = await dashboardRepository.getCompanyDashboardStats(company.id);
+
+            res.status(200).json({
+               success: true,
+               data,
+            });
+         } catch (error) {
+            console.error("Company dashboard error:", error);
+            res.status(500).json({
+               success: false,
+               message: "Failed to load company dashboard statistics",
             });
          }
       }
