@@ -28,4 +28,7 @@ clientRouter.get('/profile', authController.getUser )
 
 clientRouter.get("/getPayments", requirementController.getClientPayments);
 
+clientRouter.get("/project-stats", requirementController.getClientDashboardStats);
+
+
 export default clientRouter;

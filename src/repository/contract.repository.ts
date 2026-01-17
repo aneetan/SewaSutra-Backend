@@ -183,11 +183,13 @@ class ContractRepository {
 
       // Decide new status
       let newStatus: "PARTIALLY_PAID" | "FULLY_PAID";
+      let newContractStatus = contract.status;
 
       if (contract.paymentStatus === "PENDING") {
          newStatus = "PARTIALLY_PAID";
       } else if(contract.paymentStatus === "PARTIALLY_PAID") {
          newStatus = "FULLY_PAID";
+         newContractStatus = "COMPLETED";
       }
 
       // Update contract status
@@ -195,9 +197,11 @@ class ContractRepository {
          where: { id: contractId },
          data: {
             paymentStatus: newStatus,
+            status: newContractStatus,
             updatedAt: new Date(),
          },
       });
+
 
       return updatedContract;
    }
@@ -207,6 +211,45 @@ class ContractRepository {
       where: {
         status: "ACTIVE", 
       },
+      include: {
+        requirement: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            user: true
+          },
+        },
+        client: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        payment: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  async getAllProjects() {
+    return await prisma.contract.findMany({
       include: {
         requirement: {
           select: {
