@@ -1,9 +1,11 @@
 import { Router } from "express";
 import authController from "../controller/auth.controller";
+import companyController from "../controller/company.controller";
 
 const authRouter = Router();
 
 authRouter.post('/register', authController.register);
+authRouter.get("/top", companyController.getTopCompaniesController); 
 authRouter.post('/verify-otp', authController.verifyOTP);
 authRouter.post('/resend-otp', authController.resendOtp);
 authRouter.post('/login', authController.login);

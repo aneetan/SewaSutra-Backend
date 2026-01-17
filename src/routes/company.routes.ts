@@ -48,5 +48,4 @@ companyRouter.get("/getPayments", companyController.getCompanyPayments);
 
 companyRouter.get("/dashboard-stats", companyController.getCompanyDashboardStats);
 
-
 export default companyRouter;

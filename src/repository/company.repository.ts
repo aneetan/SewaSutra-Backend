@@ -249,9 +249,66 @@ class CompanyRepository {
       }
    }
 
+   async getTopCompaniesByRating()  {
+       const companies = await prisma.company.findMany({
+         select: {
+            id: true,
+            name: true,
+            description: true,
+            serviceCategory: true,
+            services: true,
+            docs: {
+               select: {
+                  logo: true
+               }
+            },
+            user: {
+            select: {
+               email: true,
+            },
+            },
+            contracts: {
+            select: {
+               id: true,
+            },
+            },
+            review: {
+            select: {
+               rating: true,
+            },
+            },
+         },
+      });
 
+  // calculate total projects + average rating
+  const formatted = companies.map((company) => {
+    const totalProjects = company.contracts.length;
 
+    const averageRating =
+      company.review.length > 0
+        ? company.review.reduce((sum, r) => sum + r.rating, 0) /
+          company.review.length
+        : 0;
 
+    return {
+      id: company.id,
+      name: company.name,
+      logo: company.docs[0].logo,
+      serviceCategory: company.serviceCategory,
+      bio: company.description,
+      email: company.user.email,
+      skills: company.services,
+      totalProjects,
+      rating: Number(averageRating.toFixed(1)),
+    };
+  });
+
+  // sort by rating DESC and take top 6
+  return formatted
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 6);
+
+   }
 
 }
 
