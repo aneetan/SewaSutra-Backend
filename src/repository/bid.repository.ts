@@ -95,7 +95,8 @@ class BidRepository {
    * Store quote in company
    */
   async createQuote(bid: Omit<BidData, 'id'>): Promise<BidData> {
-      const bidSubmitted =  await prisma.bid.create({
+     return await prisma.$transaction(async (tx) => {
+      const bidSubmitted =  await tx.bid.create({
         data: {
           amount: bid.amount,
           deliveryTime: bid.deliveryTime,
@@ -106,7 +107,15 @@ class BidRepository {
         }
       });
 
+         await tx.bidRequest.update({
+            where: { id: bid.bidRequestId },
+            data: {
+               status: "SENT",
+            },
+         });
+
       return bidSubmitted;
+      });
   }
 
 
@@ -267,6 +276,40 @@ class BidRepository {
       },
       data: {
         status,
+      },
+    });
+  }
+
+  async declineBidRequest(bidRequestId: number) {
+    return await prisma.bidRequest.update({
+      where: { id: bidRequestId },
+      data: {
+        status: "DECLINED",
+      },
+    });
+  }
+
+    async updateQuote(quoteId: number, data: any) {
+    return await prisma.bid.update({
+      where: {
+        id: quoteId,
+      },
+      data: {
+        amount: data.amount,
+        deliveryTime: data.deliveryTime,
+        message: data.message,
+        status: data.status,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  
+  async updateBidRequest(bidRequestId: number) {
+    return await prisma.bidRequest.update({
+      where: { id: bidRequestId },
+      data: {
+        status: "SENT",
       },
     });
   }
