@@ -30,7 +30,11 @@ companyRouter.get('/payments', paymentController.getPaymentMethods)
 companyRouter.get('/bid-request', bidController.getBidRequestForCompany)
 
 companyRouter.get('/requirements-with-bids', bidController.getRequirementsWithBidRequests);
-companyRouter.post('/submit-quote', bidController.submitQuoteRequest);
+companyRouter.post('/submit-quote/:bidRequestId', bidController.submitQuoteRequest);
+companyRouter.put('/decline-quote-request/:bidRequestId', bidController.declineBidRequest);
+companyRouter.put('/update-quote/:quoteId', bidController.updateQuoteByCompany);
+
+
 companyRouter.get('/submitted-quote', bidController.getCompanySubmittedBids);
 companyRouter.put('/:bidId/revoke', bidController.revokeBidByCompany);
 
@@ -41,11 +45,13 @@ companyRouter.get('/bid-status/:requirementId', bidController.checkCompanyBidSta
 companyRouter.get('/haskyc', companyController.hasCompanyData)
 
 companyRouter.get('/contracts/pending', contractController.getCompanyPendingContracts)
-companyRouter.get('/contract/projects', contractController.getCompanyProjects)
+companyRouter.get('/contracts/all-projects', contractController.getAllContractsForCompany)
 
 companyRouter.get("/kyc-status", companyController.getKycStatus);
 companyRouter.get("/getPayments", companyController.getCompanyPayments);
 
 companyRouter.get("/dashboard-stats", companyController.getCompanyDashboardStats);
+
+
 
 export default companyRouter;

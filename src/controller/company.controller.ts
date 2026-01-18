@@ -8,7 +8,6 @@ import { errorResponse } from "../helpers/errorMsg.helper";
 import { parseJSONField } from "../helpers/parseJsonField";
 import { webhookService } from "../services/embedding/webhook.services";
 import notificationService from "../services/notification.service";
-import cloudinary from "../config/cloudinary.config";
 import userRepository from "../repository/user.repository";
 import { esewaRepository } from "../repository/esewa.repository";
 import dashboardRepository from "../repository/dashboard.repository";
@@ -47,9 +46,6 @@ class CompanyController {
          };
 
          const result = await companyRepository.registerCompany(formData);
-
-         //Trigger embedding generation in background
-         webhookService.processNewCompany(result.company.id, result.company);
 
             res.status(201).json({
                success: true,
@@ -170,7 +166,7 @@ class CompanyController {
 
             let message = "";
             if (kycStatus === "PENDING") {
-            message = "Your KYC is not filled yet! Please complete profile setup.";
+            message = "Your KYC is not approved yet! Please wait for approval.";
             } else if (kycStatus === "DECLINED") {
             message = "Your KYC has been declined. Please resubmit your profile.";
             }

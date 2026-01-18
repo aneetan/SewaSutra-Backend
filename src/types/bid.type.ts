@@ -17,6 +17,7 @@ export interface BidData {
   deliveryTime: string;
   companyId?: number;
   requirementId?: number;
+  bidRequestId?: number;
   status?: BidStatus;
   createdAt?: Date;
   updatedAt?: Date;

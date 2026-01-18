@@ -8,6 +8,7 @@ import { webhookService } from "../services/embedding/webhook.services";
 import { ProjectAttributes } from "../types/company/project.types";
 import projectRepository from "../repository/project.repository";
 import { authMiddleware } from "../middleware/authMiddleware";
+import companyRepository from "../repository/company.repository";
 
 class ProjectController {
    createProject = [
@@ -46,7 +47,7 @@ class ProjectController {
          try {
             const request = req as Request & { userId: string };
             const userId = Number(request.userId);
-            const companyId = Number(req.params.companyId);
+            const companyId = Number(request.params.companyId)
 
             // Get the company of the user first
             const companyProjects = await projectRepository.getAllProjects(companyId);

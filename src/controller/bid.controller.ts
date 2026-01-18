@@ -14,7 +14,7 @@ class BidController {
    createBidRequestWithNotification = [
       authMiddleware,
       requireClient,
-      async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction): Promise<void> => {
+      async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction) => {
          try {
             const { userId, companyId, requirementId, userName } = req.body;
 
@@ -149,9 +149,10 @@ class BidController {
 
    submitQuoteRequest = [
       authMiddleware,
-      requireClient,
-      async(req:Request<{}, {}, BidData>, res: Response, next: NextFunction): Promise<void> => {
+      async(req:Request, res: Response, next: NextFunction): Promise<void> => {
          try {
+            const bidRequestId = Number(req.params.bidRequestId);
+
             const { amount, deliveryTime, message, companyId, requirementId, status } = req.body;
 
             const requirement = requirementRepository.getRequirementById(requirementId);
@@ -164,6 +165,7 @@ class BidController {
                status,
                companyId,
                requirementId,
+               bidRequestId,
                createdAt: new Date()
             }
 
@@ -198,7 +200,6 @@ class BidController {
 
    getQuoteForRequirement = [
       authMiddleware,
-      requireClient,
       async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction): Promise<void> => {
          try {
             const { requirementId } = req.query;
@@ -409,6 +410,82 @@ class BidController {
          });
       }
    }
+   ]
+
+   declineBidRequest = [
+      async (req: Request, res: Response) => {
+          try {
+            const bidRequestId = Number(req.params.bidRequestId);
+
+            if (!bidRequestId) {
+               return res.status(400).json({
+               success: false,
+               message: "BidRequest ID is required",
+               });
+            }
+
+            const updated = await bidRepository.declineBidRequest(bidRequestId);
+
+            return res.status(200).json({
+               success: true,
+               message: "Bid request declined successfully",
+               data: updated,
+            });
+         } catch (error: any) {
+            console.error("Decline BidRequest Error:", error);
+
+            return res.status(500).json({
+               success: false,
+               message: "Failed to decline bid request",
+            });
+         }
+
+      }
+   ]
+
+   updateQuoteByCompany = [
+      async (req: Request, res: Response) => {
+       try {
+         const quoteId = Number(req.params.quoteId);
+
+         if (!quoteId) {
+            return res.status(400).json({
+            success: false,
+            message: "Quote ID is required",
+            });
+         }
+
+         const { amount, deliveryTime, message, status, isFinalBid } = req.body;
+
+         if (!amount || !deliveryTime) {
+            return res.status(400).json({
+            success: false,
+            message: "Amount and delivery time are required",
+            });
+         }
+
+         const updatedQuote = await bidRepository.updateQuote(quoteId, {
+            amount,
+            deliveryTime,
+            message,
+            status,
+            isFinalBid,
+         });
+
+         return res.status(200).json({
+            success: true,
+            message: "Quote updated successfully",
+            data: updatedQuote,
+         });
+      } catch (error: any) {
+         console.error("Update Quote Error:", error);
+
+         return res.status(500).json({
+            success: false,
+            message: "Failed to update quote",
+         });
+      }
+      }
    ]
 
 }

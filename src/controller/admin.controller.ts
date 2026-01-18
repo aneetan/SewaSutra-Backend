@@ -8,6 +8,7 @@ import emailService from "../services/email.service";
 import userRepository from "../repository/user.repository";
 import contractRepository from "../repository/contract.repository";
 import dashboardRepository from "../repository/dashboard.repository";
+import { webhookService } from "../services/embedding/webhook.services";
 
 class AdminController {
    approveCompany = [
@@ -20,6 +21,10 @@ class AdminController {
             }
 
             const company = await companyRepository.approveCompany(companyId);
+
+            // Trigger embedding generation/update in background
+            // If company embeddings already exist in Pinecone, they will be updated
+            webhookService.processNewCompany(company.id, company);
 
             res.status(200).json({
                message: "Company approved and user verified",
