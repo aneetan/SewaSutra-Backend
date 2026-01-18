@@ -1,4 +1,5 @@
 import { Requirement, Company, Services, WorkType, Urgency } from '@prisma/client';
+import prisma from '../../config/dbconfig';
 
 export class DataTransformerService {
   
@@ -27,9 +28,19 @@ export class DataTransformerService {
   }
 
   // Transform Company for embedding
-  static transformCompany(company: Company & { services?: Services[] }): any {
+  static async transformCompany(company: Company & { services?: Services[] }): Promise<any> {
     const embeddingText = this.buildCompanyEmbeddingText(company);
     const serviceNames = company.services?.map(service => service.service) || [];
+    
+    // Fetch average rating from reviews
+    const reviews = await prisma.review.findMany({
+      where: { companyId: company.id, deletedAt: false },
+      select: { rating: true }
+    });
+    
+    const averageRating = reviews.length > 0
+      ? parseFloat((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(2))
+      : 0;
     
     return {
       id: company.id,
@@ -41,6 +52,8 @@ export class DataTransformerService {
       priceRangeMax: company.priceRangeMax,
       avgDeliveryTime: company.avgDeliveryTime,
       establishedYear: company.establishedYear,
+      averageRating: averageRating,
+      totalReviews: reviews.length,
       embeddingText: embeddingText,
       entityType: 'company' as const,
       entityId: company.id,
@@ -75,7 +88,8 @@ export class DataTransformerService {
       `Services offered: ${serviceNames.join(', ')}`,
       `Price range: $${company.priceRangeMin} to $${company.priceRangeMax}`,
       `Average delivery time: ${company.avgDeliveryTime}`,
-      `Established year: ${company.establishedYear}`
+      `Established year: ${company.establishedYear}`,
+      'Ratings and reviews considered in matching'
     ];
 
     return parts.filter(part => part && part.trim()).join('. ');
@@ -87,8 +101,8 @@ export class DataTransformerService {
   }
 
   // Batch transform companies
-  static transformCompanies(companies: any[]): any[] {
-    return companies.map(company => this.transformCompany(company));
+  static async transformCompanies(companies: any[]): Promise<any[]> {
+    return Promise.all(companies.map(company => this.transformCompany(company)));
   }
 
   // Convert to JSON string for storage

@@ -88,8 +88,8 @@ class EmbeddingsService {
         throw new Error(`Company with ID ${companyId} not found`);
       }
 
-      // Transform company data
-      const transformedData = DataTransformerService.transformCompany(company);
+      // Transform company data (now includes average rating)
+      const transformedData = await DataTransformerService.transformCompany(company);
       
       // Generate embedding
       const embedding = await this.generateEmbeddings(transformedData.embeddingText);

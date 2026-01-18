@@ -47,9 +47,6 @@ class CompanyController {
 
          const result = await companyRepository.registerCompany(formData);
 
-         //Trigger embedding generation in background
-         webhookService.processNewCompany(result.company.id, result.company);
-
             res.status(201).json({
                success: true,
                message: "Company registered successfully",
@@ -169,7 +166,7 @@ class CompanyController {
 
             let message = "";
             if (kycStatus === "PENDING") {
-            message = "Your KYC is not filled yet! Please complete profile setup.";
+            message = "Your KYC is not approved yet! Please wait for approval.";
             } else if (kycStatus === "DECLINED") {
             message = "Your KYC has been declined. Please resubmit your profile.";
             }

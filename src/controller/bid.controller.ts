@@ -14,7 +14,7 @@ class BidController {
    createBidRequestWithNotification = [
       authMiddleware,
       requireClient,
-      async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction): Promise<void> => {
+      async(req:Request<{}, {}, BidRequestData>, res: Response, next: NextFunction) => {
          try {
             const { userId, companyId, requirementId, userName } = req.body;
 

@@ -20,17 +20,19 @@ export class WebhookService {
     }
   }
 
-  // Process COMPANY in background after creation
+  // Process COMPANY in background after creation or approval
+  // If company already exists in Pinecone, embeddings will be updated with latest data
   async processNewCompany(companyId: number, companyData: any) {
     try {
       
       // Use the existing method from embeddingService
+      // This will create new embeddings if they don't exist, or update existing ones
       embeddingService.saveCompanyEmbedding(companyId)
         .then(() => {
-          console.log(`Embedding generated for company ${companyId}`);
+          console.log(`Embedding generated/updated for company ${companyId}`);
         })
         .catch(error => {
-          console.error(`Failed to generate embedding for company ${companyId}:`, error);
+          console.error(`Failed to generate/update embedding for company ${companyId}:`, error);
         });
 
     } catch (error) {
