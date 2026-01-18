@@ -95,11 +95,37 @@ class ChatRepository {
         status: 'ACTIVE',
       },
       include: {
-        participant1: true,
-        participant2: true,
+        participant1: {
+          include: {
+            companies: {
+              select: {
+                id: true,
+                name: true,
+                docs: {
+                  select: { logo: true },
+                },
+              },
+              take: 1,
+            },
+          },
+        },
+        participant2: {
+          include: {
+            companies: {
+              select: {
+                id: true,
+                name: true,
+                docs: {
+                  select: { logo: true },
+                },
+              },
+              take: 1,
+            },
+          },
+        },
         lastMessage: true,
         _count: {
-          select: {
+          select: { 
             messages: {
               where: {
                 isDeleted: false,
@@ -115,11 +141,36 @@ class ChatRepository {
       },
     });
 
-    return chats.map(chat => ({
-      ...chat,
-      otherParticipant: chat.participant1Id === userId ? chat.participant2 : chat.participant1,
-      unreadCount: chat._count.messages,
-    }))
+    return chats.map(chat => {
+      const otherParticipant = chat.participant1Id === userId ? chat.participant2 : chat.participant1;
+      const companyData = otherParticipant.companies && otherParticipant.companies.length > 0 
+        ? otherParticipant.companies[0] 
+        : null;
+      
+      return {
+        id: chat.id,
+        participant1Id: chat.participant1Id,
+        participant2Id: chat.participant2Id,
+        status: chat.status,
+        createdAt: chat.createdAt,
+        updatedAt: chat.updatedAt,
+        lastMessageId: chat.lastMessageId,
+        lastMessage: chat.lastMessage,
+        unreadCount: chat._count.messages,
+        otherParticipant: {
+          id: otherParticipant.id,
+          name: otherParticipant.name,
+          email: otherParticipant.email,
+          phone: otherParticipant.phone,
+          address: otherParticipant.address,
+          profile: otherParticipant.profile,
+          role: otherParticipant.role,
+          logo: otherParticipant.role === 'COMPANY' && companyData && companyData.docs && companyData.docs.length > 0
+            ? companyData.docs[0].logo ?? null 
+            : null,
+        },
+      };
+    });
   }
 
    // Mark messages as read
@@ -195,7 +246,20 @@ class ChatRepository {
         isDeleted: false,
       },
       include: {
-        sender: true,
+        sender: {
+          include: {
+            companies: {
+              select: {
+                id: true,
+                name: true,
+                docs: {
+                  select: { logo: true },
+                },
+              },
+              take: 1,
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -220,7 +284,23 @@ class ChatRepository {
       });
     }
     
-    return messages.reverse(); // Return in chronological order
+    // Map messages to include company info if sender is a company
+    return messages.reverse().map(msg => {
+      const companyData = msg.sender.companies && msg.sender.companies.length > 0 
+        ? msg.sender.companies[0]
+        : null;
+
+      return {
+        ...msg,
+        senderCompany: msg.sender.role === 'COMPANY' && companyData
+          ? {
+              id: companyData.id,
+              name: companyData.name,
+              logo: companyData.docs && companyData.docs.length > 0 ? companyData.docs[0].logo : null,
+            }
+          : null,
+      };
+    });
   }
 
 }

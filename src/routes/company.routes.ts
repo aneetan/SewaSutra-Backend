@@ -45,7 +45,7 @@ companyRouter.get('/bid-status/:requirementId', bidController.checkCompanyBidSta
 companyRouter.get('/haskyc', companyController.hasCompanyData)
 
 companyRouter.get('/contracts/pending', contractController.getCompanyPendingContracts)
-companyRouter.get('/contract/projects', contractController.getCompanyProjects)
+companyRouter.get('/contracts/all-projects', contractController.getAllContractsForCompany)
 
 companyRouter.get("/kyc-status", companyController.getKycStatus);
 companyRouter.get("/getPayments", companyController.getCompanyPayments);

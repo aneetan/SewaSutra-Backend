@@ -155,22 +155,24 @@ class ContractRepository {
       }
    ]
 
-   getCompanyProjects = [
+   getAllContractsForCompany = [
       async(req:Request, res: Response, next: NextFunction): Promise<void> => {
          try {
             const request = req as Request & { userId: string };
-            const companyId = Number(request.userId);
+            const userId = Number(request.userId);
 
-            const projects = await contractRepository.getProjectsForCompany(companyId);
+            const company = await companyRepository.getCompanyByUser(userId);
+
+            const contractProject = await contractRepository.getAllProjectsForCompany(company.id);
                res.status(200).json({
-                  message: "final quotes for company fetched successfully",
-                  totalProjects: projects.length,
-                  data: projects,
+                  message: "All contracts for company fetched successfully",
+                  totalProjects: contractProject.length,
+                  data: contractProject,
                });
 
          } catch (error: any) {
             res.status(500).json({
-               message: error.message || "Failed to fetch contract requests",
+               message: error.message || "Failed to fetch contracts",
             });
          }
       }

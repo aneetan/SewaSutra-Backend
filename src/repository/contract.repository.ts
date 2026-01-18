@@ -97,12 +97,12 @@ class ContractRepository {
       });
    }
 
-   async getProjectsForCompany(companyId: number) {
+   async getAllProjectsForCompany(companyId: number) {
       return await prisma.contract.findMany({
          where: {
             companyId,
             status: {
-            not: "PENDING_SIGNATURE",
+               not: "PENDING_SIGNATURE",
             },
          },
          include: {
