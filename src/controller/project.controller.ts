@@ -47,10 +47,10 @@ class ProjectController {
          try {
             const request = req as Request & { userId: string };
             const userId = Number(request.userId);
-            const company= companyRepository.getCompanyByUser(userId);
+            const companyId = Number(request.params.companyId)
 
             // Get the company of the user first
-            const companyProjects = await projectRepository.getAllProjects((await company).id);
+            const companyProjects = await projectRepository.getAllProjects(companyId);
 
             res.status(200).json({
             message: "Projects fetched successfully",
