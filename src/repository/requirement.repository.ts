@@ -50,6 +50,45 @@ class RequirementRepository {
             orderBy: { createdAt: 'desc' }
          });
       }
+
+   async updateRequirement(
+      id: number,
+      data: {
+         title: string;
+         description: string;
+         attachment?: string | null;
+      }
+   ) {
+      return await prisma.requirement.update({
+         where: { id },
+         data: {
+         title: data.title,
+         description: data.description,
+         attachment: data.attachment,
+         },
+      });
+   }
+
+    async deleteRequirementWithRelations(requirementId: number) {
+    return await prisma.$transaction(async (tx) => {
+      // delete bids related to this requirement
+      await tx.bid.deleteMany({
+        where: { requirementId },
+      });
+
+      // delete bid requests related to this requirement
+      await tx.bidRequest.deleteMany({
+        where: { requirementId },
+      });
+
+      // finally delete the requirement
+      const deletedRequirement = await tx.requirement.delete({
+        where: { id: requirementId },
+      });
+
+      return deletedRequirement;
+    });
+  }
 }
 
 export default new RequirementRepository();

@@ -184,6 +184,67 @@ class RequirementController {
          }
       ]
 
+      updateRequirement = [
+         async (req: Request, res: Response) => {
+             try {
+               const { id } = req.params;
+               const { title, description, attachment } = req.body;
+
+               if (!title || !description) {
+                  return res.status(400).json({
+                  success: false,
+                  message: "Title and description are required",
+                  });
+               }
+
+               const updatedRequirement = await requirementRepository.updateRequirement(
+                  Number(id),
+                  { title, description, attachment }
+               );
+
+               return res.status(200).json({
+                  success: true,
+                  message: "Requirement updated successfully",
+                  body: updatedRequirement,
+               });
+            } catch (error) {
+               console.error("Update Requirement Error:", error);
+               return res.status(500).json({
+                  success: false,
+                  message: "Failed to update requirement",
+               });
+            }
+         }
+      ]
+
+      deleteRequirement = [
+         async (req: Request, res: Response) => {
+            try {
+               const requirementId = Number(req.params.id);
+
+               if (!requirementId) {
+                  return res.status(400).json({
+                  success: false,
+                  message: "Requirement ID is required",
+                  });
+               }
+
+               await requirementRepository.deleteRequirementWithRelations(requirementId);
+
+               return res.status(200).json({
+                  success: true,
+                  message: "Requirement and all associated bids & requests deleted successfully",
+               });
+            } catch (error: any) {
+               console.error("Delete Requirement Error:", error);
+               return res.status(500).json({
+                  success: false,
+                  message: "Failed to delete requirement",
+               });
+            }
+         }
+      ]
+
 
 }
 

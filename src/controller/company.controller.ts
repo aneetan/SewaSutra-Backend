@@ -8,7 +8,6 @@ import { errorResponse } from "../helpers/errorMsg.helper";
 import { parseJSONField } from "../helpers/parseJsonField";
 import { webhookService } from "../services/embedding/webhook.services";
 import notificationService from "../services/notification.service";
-import cloudinary from "../config/cloudinary.config";
 import userRepository from "../repository/user.repository";
 import { esewaRepository } from "../repository/esewa.repository";
 import dashboardRepository from "../repository/dashboard.repository";

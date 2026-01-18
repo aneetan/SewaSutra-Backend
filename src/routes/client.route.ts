@@ -30,5 +30,10 @@ clientRouter.get("/getPayments", requirementController.getClientPayments);
 
 clientRouter.get("/project-stats", requirementController.getClientDashboardStats);
 
+clientRouter.patch("/requirement/update/:id", requirementController.updateRequirement);
+clientRouter.delete("/requirement/delete/:id", requirementController.deleteRequirement);
+
+
+
 
 export default clientRouter;
