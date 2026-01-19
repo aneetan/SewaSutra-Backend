@@ -3,7 +3,7 @@ import { emailConfig, emailTransporter } from "../config/email.config";
 class EmailService {
 
   async sendOTPEmail(email: string, otp: string, userName: string): Promise<void> {
-    const subject = "Password Reset OTP";
+    const subject = "Sewasutra OTP";
 
     const html = `
     <!DOCTYPE html>
@@ -20,10 +20,10 @@ class EmailService {
     </head>
     <body>
       <div class="container">
-        <div class="header"><h1>Password Reset</h1></div>
+        <div class="header"><h1> Email Verification </h1></div>
         <div class="content">
           <p>Hello ${userName},</p>
-          <p>You requested to reset your password. Use the OTP below:</p>
+          <p>You requested to verify your email. Use the OTP below:</p>
           <div class="otp">${otp}</div>
           <p>This OTP will expire in 2 minutes.</p>
           <p>If you didn't request this, please ignore this email.</p>
