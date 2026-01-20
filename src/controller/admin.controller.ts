@@ -15,6 +15,7 @@ class AdminController {
       async (req: Request, res: Response, next: NextFunction) => {
          try {
             const companyId = Number(req.params.companyId);
+            const user = userRepository.getUserByCompanyId(companyId);
 
             if (!companyId) {
                return res.status(400).json({ message: "Invalid company id" });
@@ -30,7 +31,7 @@ class AdminController {
                message: "Company approved and user verified",
                data: company,
             });
-            notificationService.sendCompanyApproved(companyId, company.name);
+            notificationService.sendCompanyApproved((await user).id, company.name);
          } catch (error) {
             next(error);
          }

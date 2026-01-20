@@ -358,7 +358,7 @@ model AppPayment {
   amount            Float
   status            StatusForPayment    @default(PENDING)
   gatewayRefId      String?
-  transactionId     String
+  transactionId     String @unique  
   gatewayPayload    Json?
 
   commission        Float

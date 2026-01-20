@@ -182,13 +182,13 @@ class ContractRepository {
       if (!contract) throw new Error("Contract not found");
 
       // Decide new status
-      let newStatus: "PARTIALLY_PAID" | "FULLY_PAID";
-      let newContractStatus = contract.status;
+      let newPaymentStatus : "PARTIALLY_PAID" | "FULLY_PAID";
+      let newContractStatus= contract.status;
 
       if (contract.paymentStatus === "PENDING") {
-         newStatus = "PARTIALLY_PAID";
+         newPaymentStatus  = "PARTIALLY_PAID";
       } else if(contract.paymentStatus === "PARTIALLY_PAID") {
-         newStatus = "FULLY_PAID";
+         newPaymentStatus  = "FULLY_PAID";
          newContractStatus = "COMPLETED";
       }
 
@@ -196,7 +196,7 @@ class ContractRepository {
       const updatedContract = await prisma.contract.update({
          where: { id: contractId },
          data: {
-            paymentStatus: newStatus,
+            paymentStatus: newPaymentStatus,
             status: newContractStatus,
             updatedAt: new Date(),
          },
