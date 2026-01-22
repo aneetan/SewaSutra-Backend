@@ -76,6 +76,7 @@ export class DataTransformerService {
 
     return parts.filter(part => part && part.trim()).join('. ');
   }
+  
 
   // Build combined text for company embedding
   private static buildCompanyEmbeddingText(company: Company & { services?: Services[] }): string {
