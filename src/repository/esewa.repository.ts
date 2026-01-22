@@ -15,17 +15,15 @@ class EsewaRepository {
     gatewayrefId?: string;
   }) {
 
-    const existingPayment = await prisma.appPayment.findFirst({
-      where: {
-        contractId: data.contractId,
-        clientId: data.clientId,
-        gateway: data.gateway,
-      },
-    });
+     const existingPayment = await prisma.appPayment.findUnique({
+        where: {
+          transactionId: data.transactionId,
+        },
+      });
 
     if (existingPayment) {
         return existingPayment;
-    } else {
+    } 
       const status = data.gateway === 'ESEWA' ? StatusForPayment.PENDING : StatusForPayment.SUCCESS;
       return prisma.appPayment.create({
           data: {
@@ -44,7 +42,6 @@ class EsewaRepository {
             updatedAt: new Date(),
           }
       });
-    }
   }
 
   findByTransactionId(transactionId: string) {
