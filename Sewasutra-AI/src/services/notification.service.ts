@@ -182,7 +182,7 @@ export class NotificationService {
   async sendPaymentReceived(userId: number, paymentId: number, amount: number, medium: string): Promise<NotificationData> {
     return this.sendToUser(userId, {
       title: 'Payment Received',
-      message: `Payment of $${amount.toFixed(2)} has been received through ${medium}.`,
+      message: `Payment of Rs${amount.toFixed(2)} has been received through ${medium}.`,
       type: 'payment_received',
       data: { paymentId, amount }
     });

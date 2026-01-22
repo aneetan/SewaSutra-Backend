@@ -114,6 +114,7 @@ class EmbeddingsService {
       throw error;
     }
   }
+  
 
    // Find matching COMPANIES for a REQUIREMENT
   async findCompaniesForRequirement(requirementId: number, topK: number = 5) {

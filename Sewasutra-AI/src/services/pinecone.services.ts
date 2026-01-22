@@ -76,6 +76,7 @@ class PineconeService {
          throw error;
       }
    }
+   
 
    async searchSimilar(
       queryEmbedding: number[],
