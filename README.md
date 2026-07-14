@@ -61,9 +61,7 @@ It bridges the gap between service seekers and providers by enabling requirement
 ---
 
 ### Backend 
-- Java for major CRUD
-- Node.js for AI
-- Hibernate
+- Node.js for Backend
 - Prisma ORM  
 - PostgreSQL  
 - Hugging Face Sentence Transformer for embeddings
